@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>도현의 균열 - Crack of Dohyeon</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Noto+Serif+KR:wght@400;700;900&display=swap');
+
+* { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+
+body {
+  background: radial-gradient(ellipse at center, #1a0d2e 0%, #0a0612 70%, #000 100%);
+  font-family: 'Noto Serif KR', serif;
+  color: #e8d4a0;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#game-container {
+  position: relative;
+  width: 1280px;
+  height: 760px;
+  background: #0a0612;
+  border: 2px solid #d4af37;
+  box-shadow: 0 0 80px rgba(180,90,30,0.3), inset 0 0 60px rgba(0,0,0,0.9);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cinzel { font-family: 'Cinzel', serif; }
+
+@keyframes screenFadeIn { 0% { opacity: 0; transform: scale(1.02) translateY(10px); filter: blur(4px); } 100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); } }
+@keyframes popIn { 0% { opacity: 0; transform: scale(0.5); } 80% { transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes shineSlide { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
+@keyframes rainbowBg { 0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;} }
+@keyframes superShake { 0% { transform: translate(0, 0) rotate(0deg); } 25% { transform: translate(5px, 5px) rotate(1deg); } 50% { transform: translate(-5px, -5px) rotate(-1deg); } 75% { transform: translate(-5px, 5px) rotate(1deg); } 100% { transform: translate(5px, -5px) rotate(-1deg); } }
+@keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 10px #ffd700; } 50% { box-shadow: 0 0 30px #ff6b6b; } }
+
+.screen { position: absolute; top:0; left:0; right:0; bottom:0; display: none; z-index: 10; }
+.screen.active { display: block; animation: screenFadeIn 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; }
+
+.btn { position: relative; overflow: hidden; padding: 12px 18px; background: linear-gradient(180deg, rgba(139, 105, 20, 0.8), rgba(107, 68, 35, 0.9)); border: 1px solid #ffd700; color: #fff; font-family: 'Cinzel', serif; font-weight: 700; cursor: pointer; border-radius: 6px; font-size: 14px; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); backdrop-filter: blur(4px); }
+.btn::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%); transform: skewX(-25deg); animation: shineSlide 4s infinite; }
+.btn:hover { background: linear-gradient(180deg, rgba(255, 183, 77, 0.9), rgba(139, 105, 20, 0.9)); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { filter: grayscale(1) opacity(0.5); cursor:not-allowed; transform:none; box-shadow:none; }
+.btn::after { display: none; }
+.btn:not(:disabled)::after { display: block; }
+
+.btn-primary { background: linear-gradient(180deg, rgba(201, 48, 44, 0.8), rgba(139, 33, 37, 0.9)); border-color:#ff6b6b; }
+.btn-primary:hover { background: linear-gradient(180deg, rgba(255, 107, 107, 0.9), rgba(201, 48, 44, 0.9)); box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4); }
+.btn-gacha { background: linear-gradient(180deg, rgba(179, 136, 255, 0.8), rgba(106, 27, 154, 0.9)); border-color:#e1bee7; }
+.btn-gacha:hover { background: linear-gradient(180deg, rgba(225, 190, 231, 0.9), rgba(179, 136, 255, 0.9)); box-shadow: 0 6px 20px rgba(179, 136, 255, 0.4); }
+.btn-success { background: linear-gradient(180deg, rgba(46, 125, 50, 0.8), rgba(27, 94, 32, 0.9)); border-color:#81c784; }
+.btn-success:hover { background: linear-gradient(180deg, rgba(102, 187, 106, 0.9), rgba(46, 125, 50, 0.9)); box-shadow: 0 6px 20px rgba(102, 187, 106, 0.4); }
+.btn-artifact { background: linear-gradient(180deg, rgba(0, 150, 136, 0.8), rgba(0, 77, 64, 0.9)); border-color:#4db6ac; }
+.btn-artifact:hover { background: linear-gradient(180deg, rgba(77, 182, 172, 0.9), rgba(0, 150, 136, 0.9)); box-shadow: 0 6px 20px rgba(77, 182, 172, 0.4); }
+
+input.field, textarea.field { width: 100%; padding: 14px; background: rgba(0,0,0,0.5); border: 1px solid #d4af37; border-radius: 6px; color: #fff; font-family: 'Noto Serif KR', serif; font-size: 16px; margin-bottom: 12px; outline: none; transition: all 0.3s; backdrop-filter: blur(4px); }
+input.field:focus, textarea.field:focus { border-color: #fff; box-shadow: 0 0 15px rgba(212, 175, 55, 0.5); background: rgba(0,0,0,0.7); }
+textarea.field { resize: vertical; min-height: 100px; }
+
+/* ========== 화면 스타일 ========== */
+#screen-login { display: flex; background: radial-gradient(circle at 20% 30%, rgba(180,90,30,0.15), transparent 50%), radial-gradient(circle at 80% 70%, rgba(100,50,200,0.15), transparent 50%), radial-gradient(ellipse at center, #2a1040 0%, #0a0612 70%, #000 100%); }
+#screen-login:not(.active) { display: none; }
+.login-wrap { margin: auto; text-align: center; width: 420px; }
+.login-title { font-family: 'Cinzel', serif; font-size: 64px; font-weight: 900; color: #ffd700; letter-spacing: 8px; text-shadow: 0 0 20px rgba(255,200,80,0.6), 0 0 40px rgba(255,100,0,0.4), 4px 4px 0 rgba(0,0,0,0.8); animation: titleGlow 3s ease-in-out infinite; margin-bottom: 8px; }
+@keyframes titleGlow { 0%, 100% { text-shadow: 0 0 20px rgba(255,200,80,0.6), 0 0 40px rgba(255,100,0,0.4), 4px 4px 0 rgba(0,0,0,0.8); } 50% { text-shadow: 0 0 35px rgba(255,215,0,0.9), 0 0 60px rgba(255,100,0,0.7), 4px 4px 0 rgba(0,0,0,0.8); } }
+.login-sub { color: #b388ff; font-style: italic; letter-spacing: 6px; margin-bottom: 40px; text-shadow: 0 0 10px rgba(179,136,255,0.5); }
+.login-box { background: rgba(20,10,30,0.65); border: 1px solid rgba(212, 175, 55, 0.5); border-radius: 12px; padding: 35px; margin-top: 20px; backdrop-filter: blur(12px); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+.login-tab { display: flex; gap: 8px; margin-bottom: 24px; }
+.login-tab-btn { flex: 1; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid #6b4423; color: #888; cursor: pointer; font-family: 'Cinzel', serif; font-weight: 700; border-radius: 6px; transition: all 0.3s; }
+.login-tab-btn.active { background: rgba(212, 175, 55, 0.2); color: #ffd700; border-color: #ffd700; box-shadow: inset 0 0 10px rgba(255,215,0,0.2); }
+.pin-input { display: flex; gap: 10px; justify-content: center; margin-bottom: 16px; }
+.pin-digit { width: 55px; height: 65px; text-align: center; font-size: 32px; font-weight: 900; background: rgba(0,0,0,0.5); border: 1px solid #d4af37; border-radius: 8px; color: #ffd700; outline: none; transition: all 0.2s; }
+.pin-digit:focus { border-color: #fff; box-shadow: 0 0 15px rgba(255,215,0,0.6); transform: translateY(-2px); }
+.login-hint { font-size: 13px; color: #aaa; margin: 10px 0; letter-spacing: 1px; }
+
+#screen-mainmenu { background: radial-gradient(circle at 25% 35%, rgba(180,90,30,0.2), transparent 50%), radial-gradient(circle at 75% 65%, rgba(100,50,200,0.2), transparent 50%), url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="none"/><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.05)"/></svg>'), radial-gradient(ellipse at center, #1a0d2e 0%, #0a0612 70%, #000 100%); }
+.menu-topbar { position: absolute; top: 0; left: 0; right: 0; height: 70px; background: linear-gradient(180deg, rgba(20,10,5,0.8), rgba(40,20,10,0.5)); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(212, 175, 55, 0.4); display: flex; align-items: center; padding: 0 30px; gap: 20px; z-index: 5; }
+.profile { display: flex; align-items: center; gap: 14px; }
+.profile-avatar { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, #ffd700, #ff6b6b); display: flex; align-items: center; justify-content: center; font-size: 30px; border: 2px solid #fff; box-shadow: 0 0 20px rgba(255,200,80,0.6); }
+.profile-info { color: #fff; }
+.profile-name { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 900; color: #ffd700; letter-spacing: 1px; }
+.profile-meta { font-size: 12px; color: #ccc; margin-top: 2px; }
+
+/* 추가된 상단 아이콘 버튼 스타일 */
+.top-icons-wrap { display:flex; gap:12px; margin-left: 20px; }
+.top-icon-btn { width: 42px; height: 42px; background: rgba(0,0,0,0.6); border: 1px solid rgba(212,175,55,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; transition: all 0.3s; position: relative; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+.top-icon-btn:hover { background: rgba(212,175,55,0.2); box-shadow: 0 0 15px rgba(212,175,55,0.5); transform: translateY(-2px) scale(1.05); border-color: #ffd700; }
+.mail-badge { position: absolute; top: -4px; right: -4px; background: #e53935; color: #fff; font-size: 11px; font-weight: 900; padding: 2px 6px; border-radius: 12px; border: 2px solid #1a0d2e; box-shadow: 0 0 5px rgba(0,0,0,0.5); font-family: sans-serif; }
+
+.menu-resources { display: flex; gap: 16px; margin-left: auto; }
+.menu-resource { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.6); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.5); font-family: 'Cinzel', serif; font-weight: 900; font-size: 16px; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+.gold { color: #ffd700; text-shadow: 0 0 5px rgba(255,215,0,0.5); }
+.gem { color: #b388ff; text-shadow: 0 0 5px rgba(179,136,255,0.5); }
+.scrap { color: #81c784; text-shadow: 0 0 5px rgba(129,199,132,0.5); }
+.artfrag { color: #4db6ac; text-shadow: 0 0 5px rgba(77,182,172,0.5); }
+.logout-btn { padding: 8px 16px; background: rgba(0,0,0,0.5); border: 1px solid #8b2125; color: #ff6b6b; font-family: 'Cinzel', serif; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 13px; transition: all 0.3s; }
+.logout-btn:hover { background: rgba(139, 33, 37, 0.8); color: #fff; box-shadow: 0 0 10px rgba(255,107,107,0.5); }
+
+.menu-grid { position: absolute; top: 110px; left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 1050px; }
+.menu-card { width: calc(25% - 20px); min-width: 220px; background: linear-gradient(135deg, rgba(60,40,20,0.4), rgba(20,10,30,0.6)); backdrop-filter: blur(6px); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 12px; padding: 30px 15px; text-align: center; cursor: pointer; position: relative; overflow: hidden; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); animation: float 4s ease-in-out infinite; }
+.menu-card:nth-child(1) { animation-delay: 0s; } .menu-card:nth-child(2) { animation-delay: 0.2s; } .menu-card:nth-child(3) { animation-delay: 0.4s; } .menu-card:nth-child(4) { animation-delay: 0.6s; } .menu-card:nth-child(5) { animation-delay: 0.8s; } .menu-card:nth-child(6) { animation-delay: 1.0s; } .menu-card:nth-child(7) { animation-delay: 1.2s; } .menu-card:nth-child(8) { animation-delay: 1.4s; }
+.menu-card::before { content: ''; position: absolute; top:-50%; left:-50%; width:200%; height:200%; background: radial-gradient(circle, rgba(255,215,0,0.15), transparent 50%); opacity: 0; transition: opacity 0.4s; }
+.menu-card:hover { border-color: #ffd700; transform: translateY(-10px) scale(1.05) !important; box-shadow: 0 15px 30px rgba(255,200,80,0.2), inset 0 0 20px rgba(255,215,0,0.1); animation-play-state: paused; }
+.menu-card:hover::before { opacity: 1; }
+.menu-icon { font-size: 60px; margin-bottom: 12px; filter: drop-shadow(0 8px 15px rgba(0,0,0,0.8)); transition: transform 0.3s; }
+.menu-card:hover .menu-icon { transform: scale(1.1); }
+.menu-title { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(255,215,0,0.8); letter-spacing: 2px; margin-bottom: 8px; }
+.menu-desc { font-size: 12px; color: #e1bee7; font-style: italic; opacity: 0.8; }
+.menu-tagline { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: rgba(212, 175, 55, 0.6); font-size: 14px; font-style: italic; letter-spacing: 2px; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+#hud { position: absolute; top: 0; left: 0; right: 0; height: 65px; background: linear-gradient(180deg, rgba(20,10,5,0.85), rgba(40,20,10,0.6)); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(212, 175, 55, 0.4); display: flex; align-items: center; padding: 0 24px; gap: 18px; z-index: 100; font-family: 'Cinzel', serif; }
+.resource { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 6px; border: 1px solid rgba(212, 175, 55, 0.3); font-size: 18px; font-weight: 700; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+.resource .icon { font-size: 24px; }
+.life { color: #ff6b6b; text-shadow: 0 0 8px rgba(255,107,107,0.6); }
+.wave-info { color: #fff; margin-left: auto; font-size: 20px; font-weight: bold; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+.chapter-info { color: #ffd700; font-size: 22px; font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 15px rgba(255,215,0,0.6); margin-right: 20px;}
+.back-btn { padding: 8px 16px; background: rgba(0,0,0,0.6); border: 1px solid rgba(212, 175, 55, 0.5); color: #e8d4a0; cursor: pointer; border-radius: 6px; font-family: 'Cinzel', serif; font-size: 14px; font-weight: bold; transition: all 0.3s; }
+.back-btn:hover { background: rgba(212, 175, 55, 0.2); color: #fff; box-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
+
+#game-area { position: absolute; top: 65px; left: 0; right: 300px; bottom: 0; background: radial-gradient(circle at 30% 20%, rgba(80,40,20,0.3), transparent 50%), radial-gradient(circle at 70% 80%, rgba(40,20,60,0.3), transparent 50%), linear-gradient(135deg, #1a1410 0%, #0d0a1a 100%); }
+#gameCanvas { display: block; width: 100%; height: 100%; }
+
+#side-panel { position: absolute; top: 65px; right: 0; width: 300px; bottom: 0; background: linear-gradient(180deg, rgba(20,10,5,0.85), rgba(15,8,20,0.9)); backdrop-filter: blur(10px); border-left: 1px solid rgba(212, 175, 55, 0.4); padding: 20px; overflow-y: auto; z-index: 50; }
+.panel-section { margin-bottom: 20px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; padding: 16px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+.panel-title { font-family: 'Cinzel', serif; font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 14px; letter-spacing: 2px; text-align: center; text-shadow: 0 0 10px rgba(255,215,0,0.6); border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 8px; }
+
+.unit-roster { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.unit-card { background: linear-gradient(180deg, rgba(60,40,20,0.5), rgba(20,10,30,0.7)); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 8px; padding: 12px 6px; text-align: center; cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
+.unit-card:hover { border-color: #ffd700; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(255,200,80,0.3); }
+.unit-card.selected { border-color: #4fc3f7; background: linear-gradient(180deg, rgba(80,120,200,0.5), rgba(40,30,80,0.8)); box-shadow: 0 0 15px rgba(80,180,255,0.6); transform: scale(1.05); }
+.unit-portrait { width: 56px; height: 56px; margin: 0 auto 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 2px solid; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+.unit-name { font-size: 13px; font-weight: 900; color: #fff; }
+.unit-cost { font-size: 12px; font-weight: bold; color: #ffd700; margin-top: 4px; text-shadow: 0 0 5px rgba(255,215,0,0.5); }
+.unit-rarity { position: absolute; top: -6px; right: -6px; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 900; font-family: 'Cinzel', serif; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+
+.rarity-Common { background:#78909c; color:#fff; border:1px solid #b0bec5; }
+.rarity-Uncommon { background:#66bb6a; color:#fff; border:1px solid #a5d6a7; }
+.rarity-Rare { background:#29b6f6; color:#fff; border:1px solid #81d4fa; }
+.rarity-SR { background:#ab47bc; color:#fff; border:1px solid #ce93d8; box-shadow: 0 0 5px #ab47bc; }
+.rarity-SSR { background: linear-gradient(135deg, #ffd700, #ff6b6b); color:#fff; border:1px solid #fff; box-shadow: 0 0 10px #ffd700; }
+.rarity-Mystic { background:linear-gradient(135deg, #00bcd4, #e91e63); color:#fff; font-weight:900; border:1px solid #fff; box-shadow: 0 0 12px #00bcd4; }
+.rarity-Celestial { background:#fff; color:#000; font-weight:900; border:2px solid #ffd700; box-shadow: 0 0 15px #fff, inset 0 0 10px #ffd700; }
+.rarity-Secret { background:#000; color:#ff0000; font-weight:900; border:1px solid #ff0000; box-shadow: 0 0 15px #ff0000, inset 0 0 10px #ff0000; }
+.rarity-Our_World { background: linear-gradient(270deg, #ff6b6b, #ffd700, #81c784, #4fc3f7, #b388ff); background-size: 400% 400%; animation: rainbowBg 3s ease infinite; color:#fff; font-weight:900; border:1px solid #fff; box-shadow: 0 0 20px rgba(255,255,255,0.8); }
+.rarity-8★ { background: linear-gradient(135deg, #4dd0e1, #00bcd4); color:#fff; font-weight:900; border:2px solid #4dd0e1; box-shadow: 0 0 20px rgba(77,208,225,0.9), inset 0 0 10px rgba(0,188,212,0.4); animation: glow-8star 2s infinite alternate; }
+@keyframes glow-8star { from { box-shadow: 0 0 20px rgba(77,208,225,0.9); } to { box-shadow: 0 0 35px rgba(77,208,225,1), 0 0 45px rgba(0,188,212,0.7); } }
+.rarity-12★ { background: linear-gradient(135deg, #ffe082, #ffc107); color:#fff; font-weight:900; border:2px solid #ffe082; box-shadow: 0 0 25px rgba(255,224,130,1), inset 0 0 15px rgba(255,152,0,0.5); animation: glow-12star 1.5s infinite alternate; }
+@keyframes glow-12star { from { box-shadow: 0 0 25px rgba(255,224,130,1), 0 0 0px rgba(255,69,0,0); } to { box-shadow: 0 0 40px rgba(255,224,130,1), 0 0 25px rgba(255,69,0,0.7); } }
+
+.speed-controls { display: flex; gap: 6px; margin-top: 10px; }
+.speed-btn { flex: 1; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(212, 175, 55, 0.4); color: #e8d4a0; font-family: 'Cinzel', serif; font-weight: bold; cursor: pointer; font-size: 14px; border-radius: 4px; transition: all 0.2s; }
+.speed-btn.active { background: linear-gradient(180deg, #ffb74d, #f57c00); color: #fff; border-color: #fff; box-shadow: 0 0 10px rgba(255,183,77,0.6); }
+
+/* 모달 */
+.modal-overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(8px); }
+.modal-overlay.active { display: flex; }
+.modal-overlay.active .modal { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.modal { background: linear-gradient(135deg, rgba(30,15,40,0.85), rgba(15,8,20,0.95)); border: 1px solid rgba(212, 175, 55, 0.6); border-radius: 12px; padding: 35px; min-width: 650px; max-width: 90%; max-height: 90%; overflow-y: auto; box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,215,0,0.1); position: relative; }
+.modal-title { font-family: 'Cinzel', serif; font-size: 36px; font-weight: 900; text-align: center; color: #fff; margin-bottom: 8px; text-shadow: 0 0 20px rgba(255,215,0,0.8); letter-spacing: 4px; }
+.modal-subtitle { text-align: center; color: #e1bee7; font-style: italic; margin-bottom: 30px; letter-spacing: 1px; }
+
+/* 덱(DECK) 시스템 UI */
+.deck-slots-container { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; background: rgba(0,0,0,0.4); padding: 16px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.3); }
+.deck-slot { width: 90px; height: 110px; background: rgba(20,10,30,0.8); border: 1px dashed #d4af37; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.deck-slot:hover { background: rgba(40,20,50,0.9); border-style: solid; transform: translateY(-3px); }
+.deck-pool-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; max-height: 350px; overflow-y: auto; padding: 10px; }
+
+.chapter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.chapter-btn { padding: 16px 10px; background: linear-gradient(180deg, rgba(80,40,20,0.6), rgba(30,15,40,0.8)); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center; position: relative; overflow: hidden; }
+.chapter-btn::after { content:''; position:absolute; top:0; left:-100%; width:50%; height:100%; background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.2), rgba(255,255,255,0)); transform: skewX(-25deg); transition: 0.5s; }
+.chapter-btn:hover:not(.locked)::after { left: 200%; }
+.chapter-btn:hover:not(.locked) { border-color: #ffd700; transform: scale(1.05) translateY(-4px); box-shadow: 0 10px 20px rgba(255,200,80,0.4); }
+.chapter-btn.locked { filter: grayscale(0.8) opacity(0.5); cursor: not-allowed; }
+.chapter-btn.cleared { border-color: #4caf50; background: linear-gradient(180deg, rgba(40,80,20,0.6), rgba(20,40,15,0.8)); box-shadow: inset 0 0 15px rgba(76,175,80,0.3); }
+.chapter-btn.boss { border-color: #ff6b6b; background: linear-gradient(180deg, rgba(120,20,20,0.7), rgba(60,10,10,0.9)); box-shadow: inset 0 0 15px rgba(255,107,107,0.3); }
+.chapter-num { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 900; color: #ffd700; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+.chapter-name { font-size: 12px; margin-top: 6px; font-weight: bold; color: #fff; }
+.chapter-stage-header { grid-column: 1 / -1; font-family: 'Cinzel', serif; color: #fff; text-shadow: 0 0 10px rgba(255,215,0,0.6); font-size: 18px; font-weight: 900; padding: 12px 0 6px; border-bottom: 1px solid rgba(212, 175, 55, 0.4); margin-top: 12px; letter-spacing: 2px; }
+
+.gacha-pull { display: inline-block; width: 140px; height: 190px; margin: 10px; border: 2px solid; border-radius: 10px; padding: 18px 10px; background: linear-gradient(180deg, rgba(60,40,20,0.7), rgba(20,10,30,0.9)); vertical-align: top; backdrop-filter: blur(4px); }
+@keyframes gachaCardReveal { 0% { transform: scale(0.1) rotateY(90deg); opacity: 0; filter: brightness(3); } 60% { transform: scale(1.1); filter: brightness(2); } 100% { transform: scale(1) rotateY(0); opacity: 1; filter: brightness(1); } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; text-shadow: 0 0 15px #ffd700; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+.rarity-effect-SSR { background: linear-gradient(135deg, rgba(255,215,0,0.3), rgba(20,10,30,0.95)); position: relative; overflow: hidden; }
+.rarity-effect-SSR::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%); transform: rotate(45deg); animation: shine 3s infinite; }
+@keyframes shine { 0% { top: -100%; left: -100%; } 100% { top: 100%; left: 100%; } }
+.gacha-pull .big-icon { font-size: 56px; margin: 8px 0; }
+#gachaCutscene { position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.95); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+#gachaCutscene.active { display: flex; animation: fadeIn 0.3s forwards; }
+.cutscene-text { font-family: 'Cinzel', serif; font-size: 60px; font-weight: 900; color: #ffd700; text-shadow: 0 0 40px #ffd700, 0 0 20px #ffb74d; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, superShake 0.4s infinite; letter-spacing: 5px; }
+
+.codex-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+.codex-tab { flex: 1; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(212, 175, 55, 0.4); color: #888; cursor: pointer; font-family: 'Cinzel', serif; font-weight: 900; font-size: 16px; border-radius: 6px; transition: all 0.3s; }
+.codex-tab.active { background: rgba(212, 175, 55, 0.2); color: #ffd700; border-color: #ffd700; box-shadow: inset 0 0 10px rgba(255,215,0,0.2); }
+.codex-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.codex-entry { background: linear-gradient(135deg, rgba(60,40,20,0.4), rgba(20,10,30,0.6)); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 10px; padding: 16px; display: flex; gap: 16px; align-items: flex-start; transition: transform 0.2s; }
+.codex-entry:hover { transform: translateY(-2px); border-color: rgba(212, 175, 55, 0.6); background: linear-gradient(135deg, rgba(60,40,20,0.6), rgba(20,10,30,0.8)); }
+.codex-entry.locked { filter: grayscale(1) brightness(0.4); }
+.codex-icon { width: 76px; height: 76px; border-radius: 10px; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; font-size: 46px; border: 2px solid; flex-shrink: 0; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); }
+.codex-info { flex: 1; }
+.codex-name { font-family: 'Cinzel', serif; font-weight: 900; font-size: 18px; color: #fff; text-shadow: 0 0 8px rgba(255,215,0,0.6); }
+.codex-title-text { font-size: 12px; color: #e1bee7; font-style: italic; margin-bottom: 8px; }
+.codex-stats { font-size: 12px; color: #eee; line-height: 1.6; }
+.codex-stats b { color: #ffb74d; }
+.codex-desc { font-size: 11px; color: #aaa; margin-top: 6px; font-style: italic; line-height: 1.4; }
+
+.craft-recipe { background: linear-gradient(135deg, rgba(60,40,20,0.4), rgba(20,10,30,0.6)); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 10px; padding: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 20px; transition: transform 0.2s; }
+.craft-recipe:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+.craft-recipe.crafted { border-color: #4caf50; opacity: 0.8; }
+.craft-icon { width: 86px; height: 86px; border-radius: 10px; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; font-size: 54px; border: 2px solid; flex-shrink: 0; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); }
+.craft-info { flex: 1; }
+.craft-name { font-family: 'Cinzel', serif; font-weight: 900; font-size: 20px; text-shadow: 0 0 10px currentColor; }
+.craft-title-text { font-size: 13px; color: #e1bee7; font-style: italic; margin-top: 2px; }
+.craft-cost { font-size: 14px; font-weight: bold; color: #ffd700; margin-top: 8px; }
+.craft-desc { font-size: 12px; color: #aaa; margin-top: 6px; line-height: 1.4; }
+.req-item { display:inline-block; margin-right:8px; padding:2px 6px; background:rgba(0,0,0,0.5); border-radius:4px; border:1px solid #555; font-size:12px; }
+.req-item.ok { border-color:#4caf50; color:#4caf50; }
+.req-item.fail { border-color:#ff5252; color:#ff5252; }
+
+.setting-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+.setting-label { color: #fff; font-weight: bold; font-size: 15px; }
+
+#tower-menu { position: absolute; bottom: 20px; left: 20px; background: linear-gradient(135deg, rgba(30,15,5,0.95), rgba(15,8,20,0.95)); backdrop-filter: blur(8px); border: 1px solid #ffd700; border-radius: 10px; padding: 18px; width: 260px; z-index: 150; display: none; box-shadow: 0 15px 30px rgba(0,0,0,0.8), 0 0 20px rgba(255,215,0,0.3); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+#tower-menu.active { display: block; }
+.tower-menu-title { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 900; color: #fff; text-align: center; text-shadow: 0 0 10px rgba(255,215,0,0.8); border-bottom: 1px solid rgba(212, 175, 55, 0.4); padding-bottom: 10px; margin-bottom: 14px; }
+.tower-stat { display: flex; justify-content: space-between; font-size: 13px; margin: 6px 0; color: #eee; }
+.tower-stat .value { color: #ffb74d; font-weight: 900; }
+.skill-info { background: rgba(60,30,80,0.5); border: 1px solid rgba(179,136,255,0.5); border-radius: 6px; padding: 10px; font-size: 12px; margin: 12px 0; color: #e1bee7; line-height: 1.4; }
+#tower-menu .btn { width: 100%; margin-bottom: 8px; }
+#side-panel .btn { width: 100%; margin-bottom: 10px; padding: 14px; font-size: 15px; }
+
+#toast { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); background: rgba(20,10,30,0.9); backdrop-filter: blur(4px); border: 1px solid #ffd700; border-radius: 8px; padding: 14px 28px; color: #fff; text-shadow: 0 0 10px #ffd700; font-weight: 900; font-size: 16px; z-index: 300; display: none; font-family: 'Cinzel', serif; box-shadow: 0 10px 20px rgba(0,0,0,0.6), 0 0 15px rgba(255,215,0,0.3); animation: fadeIn 0.3s forwards; }
+
+.result-screen { position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(10,5,15,0.95); backdrop-filter: blur(10px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 400; }
+.result-screen.active { display: flex; animation: screenFadeIn 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; }
+.result-title { font-family: 'Cinzel', serif; font-size: 90px; font-weight: 900; margin-bottom: 30px; text-shadow: 0 0 40px currentColor; letter-spacing: 10px; }
+.result-title.victory { color: #ffd700; }
+.result-title.defeat { color: #ff6b6b; }
+.result-reward { font-size: 20px; margin: 15px 0; color: #fff; line-height: 1.8; text-align: center; font-weight: bold; }
+
+::-webkit-scrollbar { width: 10px; } ::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); } ::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.6); border-radius: 5px; } ::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.9); }
+.account-list { max-height: 180px; overflow-y: auto; margin-top: 16px; }
+.account-item { background: rgba(0,0,0,0.5); border: 1px solid rgba(212, 175, 55, 0.3); padding: 10px 14px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 14px; font-weight: bold; color: #eee; transition: all 0.2s; }
+.account-item:hover { background: rgba(212, 175, 55, 0.2); border-color: #ffd700; transform: translateX(4px); }
+
+/* 유물 UI */
+.artifact-stat { display:flex; justify-content:space-between; background:rgba(0,0,0,0.6); padding:12px; margin-bottom:8px; border:1px solid #4db6ac; border-radius:6px; color:#fff; font-weight:bold; }
+.artifact-stat span:last-child { color:#b2dfdb; }
+
+/* 메일함 UI */
+.mail-item { background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.4); border-radius: 8px; padding: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+.mail-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom: 8px; }
+.mail-title-text { font-size: 16px; font-weight: 900; color: #ffd700; }
+.mail-date { font-size: 12px; color: #888; }
+.mail-content { font-size: 14px; color: #eee; line-height: 1.5; padding: 8px 0; }
+.mail-rewards { font-size: 13px; color: #4fc3f7; font-weight: bold; background: rgba(20,10,30,0.8); padding: 10px; border-radius: 6px; }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <div class="screen active" id="screen-login">
+    <div class="login-wrap">
+      <div class="login-title">도현의 균열</div>
+      <div class="login-sub">CRACK OF DOHYEON</div>
+      <div class="login-box">
+        <div class="login-tab">
+          <div class="login-tab-btn active" id="tab-login-btn" onclick="switchLoginTab('login')">로그인</div>
+          <div class="login-tab-btn" id="tab-signup-btn" onclick="switchLoginTab('signup')">회원가입</div>
+        </div>
+        <div id="login-form">
+          <input type="text" class="field" id="login-nickname" placeholder="닉네임" maxlength="12">
+          <div class="login-hint">비밀번호 (숫자 4자리)</div>
+          <div class="pin-input">
+            <input type="password" class="pin-digit" id="login-pin-0" maxlength="1"><input type="password" class="pin-digit" id="login-pin-1" maxlength="1"><input type="password" class="pin-digit" id="login-pin-2" maxlength="1"><input type="password" class="pin-digit" id="login-pin-3" maxlength="1">
+          </div>
+          <button class="btn btn-success" style="width:100%; margin-top:16px; padding: 14px; font-size: 16px;" onclick="doLogin()">🗝️ 로그인</button>
+          <div class="account-list" id="account-list"></div>
+        </div>
+        <div id="signup-form" style="display:none;">
+          <input type="text" class="field" id="signup-nickname" placeholder="닉네임 (2-12자)" maxlength="12">
+          <div class="login-hint">비밀번호 (숫자 4자리)</div>
+          <div class="pin-input">
+            <input type="password" class="pin-digit" id="signup-pin-0" maxlength="1"><input type="password" class="pin-digit" id="signup-pin-1" maxlength="1"><input type="password" class="pin-digit" id="signup-pin-2" maxlength="1"><input type="password" class="pin-digit" id="signup-pin-3" maxlength="1">
+          </div>
+          <div class="login-hint">비밀번호 확인</div>
+          <div class="pin-input">
+            <input type="password" class="pin-digit" id="signup-pin2-0" maxlength="1"><input type="password" class="pin-digit" id="signup-pin2-1" maxlength="1"><input type="password" class="pin-digit" id="signup-pin2-2" maxlength="1"><input type="password" class="pin-digit" id="signup-pin2-3" maxlength="1">
+          </div>
+          <button class="btn btn-success" style="width:100%; margin-top:16px; padding: 14px; font-size: 16px;" onclick="doSignup()">✦ 회원가입</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-mainmenu">
+    <div class="menu-topbar">
+      <div class="profile"><div class="profile-avatar" id="profile-avatar">⚔️</div><div class="profile-info"><div class="profile-name" id="profile-name">용사</div><div class="profile-meta" id="profile-meta">레벨 1 · 클리어 0</div></div></div>
+      <div class="top-icons-wrap">
+        <div class="top-icon-btn" onclick="openPatchNotesModal()" title="패치노트">📢</div>
+        <div class="top-icon-btn" onclick="openMailModal()" title="우편함">📬<span class="mail-badge" id="mail-badge" style="display:none;">0</span></div>
+      </div>
+      <div class="menu-resources">
+        <div class="menu-resource"><span>⬢</span><span class="gold" id="menu-gold">0</span></div>
+        <div class="menu-resource"><span>◆</span><span class="gem" id="menu-gem">0</span></div>
+        <div class="menu-resource"><span>⚙</span><span class="scrap" id="menu-scrap">0</span></div>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+    </div>
+    
+    <div class="menu-grid">
+      <div class="menu-card" onclick="openChapterModal()"><div class="menu-icon">⚔️</div><div class="menu-title">PLAY</div><div class="menu-desc">균열의 군세를 막아라</div></div>
+      <div class="menu-card" onclick="openDeckModal()"><div class="menu-icon">🎴</div><div class="menu-title">DECK</div><div class="menu-desc">전투 덱 편성 (최대 6명)</div></div>
+      <div class="menu-card" onclick="openGachaModal()"><div class="menu-icon">🎁</div><div class="menu-title">SUMMON</div><div class="menu-desc">영웅을 소환하라</div></div>
+      <div class="menu-card" onclick="openArtifactModal()"><div class="menu-icon">🏺</div><div class="menu-title">ARTIFACT</div><div class="menu-desc">영구 스탯 버프 부여</div></div>
+      <div class="menu-card" onclick="openCodexModal()"><div class="menu-icon">📖</div><div class="menu-title">CODEX</div><div class="menu-desc">영웅과 마물의 기록</div></div>
+      <div class="menu-card" onclick="openCraftModal()"><div class="menu-icon">⚒️</div><div class="menu-title">FORGE</div><div class="menu-desc">초월 영웅 제작</div></div>
+      <div class="menu-card" onclick="openSettingsModal()"><div class="menu-icon">⚙️</div><div class="menu-title">SETTINGS</div><div class="menu-desc">설정 및 관리자</div></div>
+      <div class="menu-card" onclick="openQuestModal()"><div class="menu-icon">📋</div><div class="menu-title">QUEST</div><div class="menu-desc">일일 퀘스트</div></div>
+      <div class="menu-card" onclick="openRuneInventoryModal()"><div class="menu-icon">📿</div><div class="menu-title">RUNE</div><div class="menu-desc">룬 관리</div></div>
+      <div class="menu-card" onclick="openCoopModal()"><div class="menu-icon">🎮</div><div class="menu-title">COOP</div><div class="menu-desc">협력 모드</div></div>
+      <div class="menu-card" onclick="claimDailyReward()"><div class="menu-icon">🎀</div><div class="menu-title">DAILY</div><div class="menu-desc">출석 보상 받기</div></div>
+    </div>
+    <div class="menu-tagline">"어둠은 다시 깨어났다. 균열의 마왕 김도현을 막을 자, 그대뿐인가."</div>
+  </div>
+
+  <div class="screen" id="screen-game">
+    <div id="hud">
+      <button class="back-btn" onclick="returnToMenu()">◀ 메뉴</button>
+      <div class="chapter-info" id="chapterDisplay">CH 1-1</div>
+      <div class="resource"><span class="icon gold">⬢</span><span class="gold" id="goldDisplay">500</span></div>
+      <div class="resource"><span class="icon gem">◆</span><span class="gem" id="gemDisplay">100</span></div>
+      <div class="resource"><span class="icon life">❤ 본진 체력</span><span class="life" id="lifeDisplay">20</span></div>
+      <div class="wave-info" id="waveDisplay">Wave 0 / 0</div>
+    </div>
+    <div id="game-area"><canvas id="gameCanvas" width="980" height="695"></canvas></div>
+    <div id="side-panel">
+      <div class="panel-section">
+        <div class="panel-title" id="placementLimit">⚔ 영웅 배치 [ 0 / 6 ]</div>
+        <div class="unit-roster" id="unitRoster"></div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-title">✦ 영웅 오토 스킬 (Lv.3에 진화!)</div>
+        <div id="skillButtons"></div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-title">⚙ 컨트롤</div>
+        <button class="btn btn-primary" id="startWaveBtn" onclick="startWave()">▶ 웨이브 시작</button>
+        <div class="speed-controls"><button class="speed-btn active" onclick="setSpeed(1)">x1</button><button class="speed-btn" onclick="setSpeed(2)">x2</button><button class="speed-btn" onclick="setSpeed(3)">x3</button></div>
+      </div>
+    </div>
+    <div id="tower-menu"></div>
+    <div id="toast"></div>
+    <div class="result-screen" id="resultScreen">
+      <div class="result-title" id="resultTitle">VICTORY</div>
+      <div class="result-reward" id="resultReward"></div>
+      <button class="btn btn-primary" style="padding:16px 48px; margin-top:40px; font-size:18px; border-radius: 8px;" onclick="afterResult()">계속하기</button>
+    </div>
+  </div>
+
+  <div id="gachaCutscene"><div class="cutscene-text">전설의 기운이 감돕니다...!!</div></div>
+
+  <div class="modal-overlay" id="deckModal"><div class="modal" style="min-width: 850px;"><div class="modal-title">🎴 전투 덱 편성</div><div class="modal-subtitle">게임에 가져갈 6명의 영웅을 선택하세요.</div><div class="deck-slots-container" id="deck-slots"></div><div class="panel-title" style="text-align:left; border-bottom:1px solid #d4af37; padding-bottom:8px; margin-top:20px;">보유한 영웅</div><div class="deck-pool-grid" id="deck-pool"></div><button class="btn btn-success" style="margin-top:24px; width:100%; padding:14px; font-size:16px;" onclick="closeModal('deckModal')">저장 및 닫기</button></div></div>
+  <div class="modal-overlay" id="chapterModal"><div class="modal" style="min-width:800px;"><div class="modal-title">📜 챕터 선택</div><div class="modal-subtitle">마왕 도현의 군세를 막아내라</div><div class="chapter-grid" id="chapterGrid"></div><button class="btn" style="margin-top:30px; width:100%; padding:14px; font-size:16px;" onclick="closeModal('chapterModal')">닫기</button></div></div>
+  <div class="modal-overlay" id="gachaModal"><div class="modal" style="min-width: 700px;"><div class="modal-title">🎁 영웅 소환</div><div class="modal-subtitle">잼으로 영웅을 소환하세요</div><div id="gachaResult" style="text-align:center; padding:20px 0;"></div><button class="btn" style="margin-top:20px; width:100%; padding:14px; font-size:16px;" onclick="closeModal('gachaModal')">닫기</button></div></div>
+  <div class="modal-overlay" id="codexModal"><div class="modal" style="min-width:760px;"><div class="modal-title">📖 도감</div><div class="modal-subtitle">영웅과 마물의 기록</div><div class="codex-tabs"><div class="codex-tab active" onclick="switchCodexTab('hero')">⚔️ 영웅</div><div class="codex-tab" onclick="switchCodexTab('enemy')">👹 마물</div></div><div class="codex-grid" id="codexGrid"></div><button class="btn" style="margin-top:30px; width:100%; padding:14px; font-size:16px;" onclick="closeModal('codexModal')">닫기</button></div></div>
+  <div class="modal-overlay" id="craftModal"><div class="modal" style="min-width: 650px;"><div class="modal-title">⚒️ 비밀 영웅 제작소</div><div class="modal-subtitle">전리품과 자원을 모아 최상위 영웅을 제작하세요</div><div style="background:rgba(0,0,0,0.6); padding:10px; border-radius:8px; border:1px solid rgba(212,175,55,0.4); margin-bottom:16px; display:flex; justify-content:space-around;"><div style="text-align:center; color:#e65100; font-size:12px;">👹 고블린 뿔<br><b id="inv-boss1" style="font-size:16px; color:#fff;">0</b></div><div style="text-align:center; color:#4e342e; font-size:12px;">🦍 오크 도끼<br><b id="inv-boss2" style="font-size:16px; color:#fff;">0</b></div><div style="text-align:center; color:#311b92; font-size:12px;">☠️ 사신 망토<br><b id="inv-boss3" style="font-size:16px; color:#fff;">0</b></div><div style="text-align:center; color:#b71c1c; font-size:12px;">👑 마왕의 핵<br><b id="inv-boss4" style="font-size:16px; color:#fff;">0</b></div></div><div id="craftList"></div><button class="btn" style="margin-top:30px; width:100%; padding:14px; font-size:16px;" onclick="closeModal('craftModal')">닫기</button></div></div>
+  <div class="modal-overlay" id="settingsModal"><div class="modal" style="min-width: 500px;"><div class="modal-title">⚙️ 설정 & 어드민</div><div class="modal-subtitle">게임 환경 설정 및 정우석 전용 관리자 기능</div><div id="settingsContent" style="background: rgba(0,0,0,0.4); border-radius: 8px; padding: 10px 20px; border: 1px solid rgba(212,175,55,0.3);"><div class="setting-row"><span class="setting-label">🔊 효과음 볼륨</span><div class="setting-control"><input type="range" min="0" max="100" id="sfx-volume" value="70"><span id="sfx-volume-val" style="display:inline-block; width:30px; text-align:right; font-weight:bold; color:#ffd700;">70</span></div></div><div class="setting-row"><span class="setting-label">🎵 배경음 볼륨</span><div class="setting-control"><input type="range" min="0" max="100" id="bgm-volume" value="50"><span id="bgm-volume-val" style="display:inline-block; width:30px; text-align:right; font-weight:bold; color:#ffd700;">50</span></div></div><div class="setting-row"><span class="setting-label">⚡ 기본 게임 속도</span><div class="setting-control"><select id="default-speed" style="padding:8px 12px; background:rgba(0,0,0,0.6); color:#ffd700; font-weight:bold; border:1px solid #d4af37; border-radius: 4px; outline:none;"><option value="1">x1</option><option value="2">x2</option><option value="3">x3</option></select></div></div><div class="setting-row"><span class="setting-label">📜 자동 웨이브 시작</span><div class="setting-control"><input type="checkbox" id="auto-wave" style="width: 20px; height: 20px; accent-color: #ffd700;"></div></div><div class="setting-row" style="border-bottom:1px solid rgba(212, 175, 55, 0.2);"><span class="setting-label" style="color:#ffb74d;">🛠️ 어드민 (정우석 전용)</span><button class="btn btn-gacha" style="padding: 8px 16px;" onclick="openAdminModal()">어드민 패널 열기</button></div><div class="setting-row" style="border-bottom:none;"><span class="setting-label" style="color:#ff6b6b;">🗑️ 계정 데이터 삭제</span><button class="btn btn-primary" style="padding: 8px 16px;" onclick="deleteAccount()">계정 삭제</button></div></div><button class="btn btn-success" style="margin-top:24px; width:100%; padding:14px; font-size:16px;" onclick="saveSettings(); closeModal('settingsModal')">저장 후 닫기</button></div></div>
+
+  <!-- 유물 모달 -->
+  <div class="modal-overlay" id="artifactModal">
+    <div class="modal" style="min-width: 600px;">
+      <div class="modal-title">🏺 유물의 성소</div>
+      <div class="modal-subtitle">유물 던전에서 획득한 <span style="color:#4db6ac">유물 조각</span>으로 계정을 영구 강화하세요.</div>
+      <div style="text-align:center; margin-bottom:20px; font-size:20px; font-weight:bold; color:#fff;">보유 유물 조각: <span id="art-frag-display" style="color:#4db6ac; text-shadow:0 0 10px #4db6ac;">0</span> 개</div>
+      <div class="artifact-stat"><span>⚔️ 전체 공격력 증가</span><span id="art-atk-val">+0%</span></div><button class="btn btn-artifact" style="width:100%; margin-bottom:16px;" onclick="upgradeArtifact('atk')">공격력 강화 (비용: <span id="art-atk-cost">100</span>)</button>
+      <div class="artifact-stat"><span>❤️ 전체 체력 증가</span><span id="art-hp-val">+0%</span></div><button class="btn btn-artifact" style="width:100%; margin-bottom:16px;" onclick="upgradeArtifact('hp')">체력 강화 (비용: <span id="art-hp-cost">100</span>)</button>
+      <div class="artifact-stat"><span>⚡ 전체 공격속도 증가</span><span id="art-as-val">+0%</span></div><button class="btn btn-artifact" style="width:100%; margin-bottom:16px;" onclick="upgradeArtifact('as')">공속 강화 (비용: <span id="art-as-cost">150</span>)</button>
+      <button class="btn" style="margin-top:20px; width:100%; padding:14px; font-size:16px;" onclick="closeModal('artifactModal')">닫기</button>
+    </div>
+  </div>
+
+  <!-- 메일함 모달 -->
+  <div class="modal-overlay" id="mailModal">
+    <div class="modal" style="min-width: 700px;">
+      <div class="modal-title">📬 우편함</div>
+      <div class="modal-subtitle">운영자 보상 및 공지를 확인하세요.</div>
+      <div style="text-align:right; margin-bottom: 12px;">
+         <button class="btn btn-success" onclick="claimAllMails()">모두 수령하기</button>
+      </div>
+      <div id="mailList" style="max-height: 400px; overflow-y: auto;"></div>
+      <button class="btn" style="margin-top:20px; width:100%; padding:14px; font-size:16px;" onclick="closeModal('mailModal')">닫기</button>
+    </div>
+  </div>
+
+  <!-- 패치노트 모달 -->
+  <div class="modal-overlay" id="patchNotesModal">
+    <div class="modal" style="min-width: 700px;">
+      <div class="modal-title">📢 패치노트</div>
+      <div class="modal-subtitle">최신 업데이트 및 공지사항</div>
+      <div id="patchNotesContent" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(212,175,55,0.4); border-radius: 8px; padding: 20px; color: #fff; font-size: 15px; line-height: 1.6; white-space: pre-wrap; min-height: 300px;"></div>
+      <button class="btn" style="margin-top:20px; width:100%; padding:14px; font-size:16px;" onclick="closeModal('patchNotesModal')">닫기</button>
+    </div>
+  </div>
+
+  <!-- 어드민 전용 패널 모달 -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal" style="min-width: 800px;">
+      <div class="modal-title" style="color:#ffb74d;">🛠️ 어드민 패널</div>
+      <div class="modal-subtitle">정우석 전용 종합 관리 시스템</div>
+      
+      <div class="panel-title" style="text-align:left;">✉️ 보상 및 우편 발송</div>
+      <div style="background: rgba(0,0,0,0.5); padding: 16px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.3); margin-bottom: 20px;">
+        <input type="text" class="field" id="admin-target" placeholder="지급 대상 닉네임 (입력하지 않거나 'ALL' 입력시 전체 유저에게 발송)">
+        <input type="text" class="field" id="admin-mail-title" placeholder="우편 제목 (예: 임시점검 보상)">
+        <textarea class="field" id="admin-mail-content" placeholder="우편 내용" style="min-height: 60px;"></textarea>
+        
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px;">
+          <input type="number" class="field" id="admin-gold" placeholder="지급 골드 (⬢)" style="margin:0;">
+          <input type="number" class="field" id="admin-gem" placeholder="지급 잼 (◆)" style="margin:0;">
+          <input type="number" class="field" id="admin-scrap" placeholder="지급 영웅파편 (⚙)" style="margin:0;">
+          <input type="number" class="field" id="admin-frag" placeholder="지급 유물조각" style="margin:0;">
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px;">
+          <input type="number" class="field" id="admin-boss1" placeholder="고블린 뿔" style="margin:0;">
+          <input type="number" class="field" id="admin-boss2" placeholder="오크 도끼" style="margin:0;">
+          <input type="number" class="field" id="admin-boss3" placeholder="사신 망토" style="margin:0;">
+          <input type="number" class="field" id="admin-boss4" placeholder="마왕의 핵" style="margin:0;">
+        </div>
+        <label style="display:flex; align-items:center; gap:8px; color:#ffd700; font-weight:bold; margin-bottom: 16px;">
+           <input type="checkbox" id="admin-unlock-heroes" style="width:20px; height:20px; accent-color:#ffd700;"> 🎁 모든 영웅 해금권 포함
+        </label>
+        <button class="btn btn-gacha" style="width:100%; padding:14px; font-size:16px;" onclick="adminSendReward()">우편 발송하기</button>
+      </div>
+
+      <div class="panel-title" style="text-align:left;">📝 패치노트 작성</div>
+      <div style="background: rgba(0,0,0,0.5); padding: 16px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.3);">
+        <textarea class="field" id="admin-patch-text" placeholder="패치노트 내용을 여기에 작성하세요." style="min-height: 150px; font-size: 14px;"></textarea>
+        <button class="btn btn-primary" style="width:100%; padding:14px; font-size:16px;" onclick="adminUpdatePatchNote()">패치노트 퍼블리싱 (저장)</button>
+      </div>
+
+      <button class="btn" style="margin-top:20px; width:100%; padding:14px; font-size:16px;" onclick="closeModal('adminModal')">닫기</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const HEROES = {
+  // 기존 영웅들
+  jinKangGeon: { id: 'jinKangGeon', name: '진강건', title: '강철의 수호자', emoji: '⚔️', color: '#ffd700', rarity: 'SSR', cost: 200, hp: 1500, maxHp: 1500, damage: 40, range: 100, attackSpeed: 1.0, projectileType: 'sword', desc: '근거리 검사.', skillTrigger: 6, skillDesc: '6회 공격: 주변 적 300 광역 피해', skillDescUp3: '6회 공격: [진화] 더 넓은 범위 800 폭발', isGacha: true },
+  jiHyeonBin: { id: 'jiHyeonBin', name: '지현빈', title: '얼음의 궁수', emoji: '🏹', color: '#4fc3f7', rarity: 'SR', cost: 120, hp: 600, maxHp: 600, damage: 25, range: 180, attackSpeed: 0.8, projectileType: 'arrow', desc: '원거리 궁수.', skillTrigger: 5, skillDesc: '5회 공격: 대상 3초 빙결', skillDescUp3: '5회 공격: [진화] 타겟 주변 5초 절대 빙결', isGacha: true },
+  kimSiHoon: { id: 'kimSiHoon', name: '김시훈', title: '폭풍의 마법사', emoji: '🔮', color: '#b388ff', rarity: 'SSR', cost: 160, hp: 500, maxHp: 500, damage: 35, range: 150, attackSpeed: 1.2, projectileType: 'magic', splashRadius: 40, skillTrigger: 8, skillDesc: '8회 공격: 맵 전체 적 100 피해', skillDescUp3: '8회 공격: [진화] 맵 전체 낙뢰 300 피해', isGacha: true },
+  jeongWooSeok: { id: 'jeongWooSeok', name: '정우석', title: '바람의 척후', emoji: '🗡️', color: '#81c784', rarity: 'R', cost: 80, hp: 800, maxHp: 800, damage: 25, range: 120, attackSpeed: 0.4, projectileType: 'dagger', skillTrigger: 10, skillDesc: '10회 공격: 3초간 공속 2배', skillDescUp3: '10회 공격: [진화] 5초간 공속 3배', isGacha: true },
+  noviceAdv: { id:'noviceAdv', name:'초보 모험가', title:'풋내기', emoji:'👦', rarity:'Common', cost:40, hp:300, maxHp: 300, damage: 15, range:80, attackSpeed:1.2, color:'#78909c', projectileType:'sword', skillTrigger:999, skillDesc:'스킬 없음', skillDescUp3:'[진화] 공격시 약간의 체력회복', isGacha: true },
+  ahnJiMin: { id:'ahnJiMin', name:'안지민', title:'빛의 인도자', emoji:'👼', rarity:'SSR', cost:240, hp:1500, maxHp:1500, damage:80, range:220, attackSpeed:1.5, color:'#f8bbd0', projectileType:'magic', skillTrigger:5, skillDesc:'5회 공격시: 아군 1명 체력 회복', skillDescUp3:'5회 공격시: [진화] 전체 아군 무적 3초 및 치유', isGacha: true },
+  zombieNi: { id:'zombieNi', name:'좀빈이', title:'역병의 군주', emoji:'🧟', rarity:'Mystic', cost:140, hp:12000, maxHp:12000, damage:500, range:150, attackSpeed:2.5, color:'#8bc34a', projectileType:'magic', skillTrigger:2, skillDesc:'2회 공격시: 자신 체력 100% 회복 및 범위 독', skillDescUp3:'2회 공격시: [진화] 맵 전체 적 2000 맹독 피해', isGacha: true },
+  abyssHyeonBin: { id:'abyssHyeonBin', name:'심연의 지현빈', title:'절망의 저격수', emoji:'👁️', rarity:'Secret', cost:500, hp:8000, maxHp:8000, damage:2500, range:250, attackSpeed:2.0, color:'#1a237e', projectileType:'arrow', skillTrigger:3, skillDesc:'3회 공격시: 일직선 파괴광선', skillDescUp3:'3회 공격시: [진화] 대륙을 가르는 진 파괴광선', isGacha: false },
+  awakenSiHoon2: { id:'awakenSiHoon2', name:'각성한 김시훈', title:'공허의 심판자', emoji:'👁️‍🗨️', rarity:'Our_World', cost:600, hp:40000, maxHp:40000, damage:800, range:300, attackSpeed:1.0, color:'#000', projectileType:'magic', splashRadius:80, skillTrigger:4, skillDesc:'4회 공격시: 공허 붕괴 (전체 적 30% 삭감)', skillDescUp3:'4회 공격시: [진화] 심리적 공포 (적 즉사 및 블랙홀)', isGacha: false },
+  ezrealAwaken: { id: 'ezrealAwaken', name: '이즈리얼 각성 (임신한 이즈리얼)', title: '탐험의 끝', emoji: '🤰', rarity: 'SSR', cost: 300, hp: 1500, maxHp: 1500, damage: 120, range: 250, attackSpeed: 2.0, color: '#ffee58', projectileType: 'magic', skillTrigger: 4, skillDesc: '4회 공격시: 정조준 일격', skillDescUp3: '4회 공격시: [진화] 태아의 분노 (초광역 폭딜)', isGacha: true },
+  shinSiHwan: { id:'shinSiHwan', name:'신시환', title:'용감한 창기사', emoji:'🤺', rarity:'SR', cost:130, hp:1100, maxHp:1100, damage:35, range:110, attackSpeed:1.0, color:'#ff9800', projectileType:'sword', skillTrigger:5, skillDesc:'5회 공격시: 전방 찌르기', skillDescUp3:'5회 공격시: [진화] 꿰뚫는 창 (일직선 피해)', isGacha: true },
+  kimSiHwan: { id:'kimSiHwan', name:'김시환', title:'그림자 검사', emoji:'🥷', rarity:'SSR', cost:210, hp:900, maxHp:900, damage:60, range:90, attackSpeed:0.5, color:'#424242', projectileType:'dagger', skillTrigger:4, skillDesc:'4회 공격시: 연속 베기', skillDescUp3:'4회 공격시: [진화] 그림자 분신 참격', isGacha: true },
+  shinSiHoon: { id:'shinSiHoon', name:'신시훈', title:'빛의 마도사', emoji:'🪄', rarity:'SR', cost:140, hp:600, maxHp:600, damage:40, range:160, attackSpeed:1.2, color:'#ffee58', projectileType:'magic', skillTrigger:6, skillDesc:'6회 공격시: 빛의 파동', skillDescUp3:'6회 공격시: [진화] 성스러운 빔 (적 실명)', isGacha: true },
+  shinSiWoo: { id:'shinSiWoo', name:'흑화한 신시우', title:'지옥불 소환사', emoji:'🔥', rarity:'Mystic', cost:300, hp:3000, maxHp:3000, damage:150, range:200, attackSpeed:1.5, color:'#d84315', projectileType:'magic', skillTrigger:3, skillDesc:'3회 공격시: 화염구 난사', skillDescUp3:'3회 공격시: [진화] 운석 3개 소환', isGacha: true },
+  jiYoung: { id:'jiYoung', name:'지영이', title:'숲의 요정', emoji:'🧚', rarity:'Rare', cost:90, hp:500, maxHp:500, damage:20, range:140, attackSpeed:1.5, color:'#66bb6a', projectileType:'magic', skillTrigger:5, skillDesc:'5회 공격시: 주변 아군 치유', skillDescUp3:'5회 공격시: [진화] 광역 도트 힐', isGacha: true },
+  youngWoong: { id:'youngWoong', name:'영웅이', title:'진정한 용사', emoji:'🦸', rarity:'SSR', cost:250, hp:2000, maxHp:2000, damage:80, range:100, attackSpeed:1.0, color:'#1e88e5', projectileType:'sword', skillTrigger:5, skillDesc:'5회 공격시: 영웅의 일격', skillDescUp3:'5회 공격시: [진화] 빛의 검 (화면 전체 데미지)', isGacha: true },
+  neoImma: { id:'neoImma', name:'너임마청년', title:'동네 형', emoji:'👲', rarity:'Uncommon', cost:50, hp:400, maxHp:400, damage:15, range:70, attackSpeed:0.8, color:'#8d6e63', projectileType:'sword', skillTrigger:999, skillDesc:'스킬 없음', skillDescUp3:'[진화] 때릴때마다 돈 뜯음 (골드 1획득)', isGacha: true },
+  aatrox: { id:'aatrox', name:'아트록스', title:'다르킨의 검', emoji:'👹', rarity:'Mystic', cost:350, hp:4000, maxHp:4000, damage:200, range:120, attackSpeed:0.6, color:'#b71c1c', projectileType:'sword', splashRadius:50, skillTrigger:3, skillDesc:'3회 공격시: 파멸의 검격 (체력흡수)', skillDescUp3:'3회 공격시: [진화] 세계의 종결자 (막대한 광역흡혈)', isGacha: true },
+  kindred: { id:'kindred', name:'킨드레드', title:'영겁의 사냥꾼', emoji:'🐺', rarity:'SSR', cost:220, hp:1200, maxHp:1200, damage:70, range:200, attackSpeed:1.2, color:'#9c27b0', projectileType:'arrow', skillTrigger:4, skillDesc:'4회 공격시: 늑대의 광기', skillDescUp3:'4회 공격시: [진화] 양의 안식처 (아군 불사)', isGacha: true },
+  joru: { id:'joru', name:'조루', title:'번개 암살자', emoji:'⚡', rarity:'Rare', cost:100, hp:500, maxHp:500, damage:50, range:90, attackSpeed:3.0, color:'#fbc02d', projectileType:'dagger', skillTrigger:10, skillDesc:'10회 공격시: 자신 체력 감소', skillDescUp3:'10회 공격시: [진화] 너무 빠른 퇴장 (폭발 후 즉사)', isGacha: true },
+  kindredAwaken: { id:'kindredAwaken', name:'킨드레드 각성 (임신한 킨드레드)', title:'생명의 사냥꾼', emoji:'🤰', rarity:'Celestial', cost:500, hp:6000, maxHp:6000, damage:300, range:220, attackSpeed:1.5, color:'#e1bee7', projectileType:'arrow', skillTrigger:5, skillDesc:'5회 공격시: 생명의 파동', skillDescUp3:'5회 공격시: [진화] 맵 전체 적 방어력 무시 극딜 및 아군 풀힐', isGacha: false },
+  yuumi: { id:'yuumi', name:'유미', title:'마법 고양이', emoji:'🐱', rarity:'SR', cost:150, hp:800, maxHp:800, damage:10, range:180, attackSpeed:1.0, color:'#03a9f4', projectileType:'magic', skillTrigger:3, skillDesc:'3회 공격시: 사르르탄', skillDescUp3:'3회 공격시: [진화] 대단원 (광역 속박)', isGacha: true },
+  yuumiAwaken: { id:'yuumiAwaken', name:'유미 각성 (임신한 유미)', title:'마법책의 어머니', emoji:'🐈', rarity:'Celestial', cost:450, hp:5000, maxHp:5000, damage:50, range:200, attackSpeed:2.0, color:'#81d4fa', projectileType:'magic', skillTrigger:4, skillDesc:'4회 공격시: 아군 전체 무한 쉴드', skillDescUp3:'4회 공격시: [진화] 기적의 탄생 (새끼 고양이 3마리 소환)', isGacha: false },
+  abiwena: { id:'abiwena', name:'아비웨나', title:'엔드필드의 검', emoji:'🗡️', rarity:'Mystic', cost:320, hp:3500, maxHp:3500, damage:180, range:130, attackSpeed:1.5, color:'#ec407a', projectileType:'sword', skillTrigger:4, skillDesc:'4회 공격시: 공간 베기', skillDescUp3:'4회 공격시: [진화] 차원 단절 참격', isGacha: true },
+  coderWooseok: { id:'coderWooseok', name:'코더 정우석', title:'디버거', emoji:'💻', rarity:'SR', cost:180, hp:1200, maxHp:1200, damage:40, range:150, attackSpeed:1.5, color:'#4caf50', projectileType:'magic', skillTrigger:6, skillDesc:'6회 공격시: 버그 수정 (적 체력 절반 감소)', skillDescUp3:'6회 공격시: [진화] 시스템 삭제 (적 즉사)', isGacha: true },
+  sacredDice: { id:'sacredDice', name:'신성한 주사위', title:'운명의 굴림', emoji:'🎲', rarity:'Mystic', cost:300, hp:2000, maxHp:2000, damage:100, range:150, attackSpeed:1.0, color:'#f48fb1', projectileType:'magic', skillTrigger:6, skillDesc:'6회 공격시: 랜덤 데미지 폭격', skillDescUp3:'6회 공격시: [진화] 무조건 6! (초대형 운석)', isGacha: true },
+  lionPaladin: { id:'lionPaladin', name:'사자자리 성기사', title:'황금의 수호자', emoji:'🦁', rarity:'Celestial', cost:550, hp:8000, maxHp:8000, damage:400, range:120, attackSpeed:1.0, color:'#ffd54f', projectileType:'sword', skillTrigger:4, skillDesc:'4회 공격시: 사자의 포효 (스턴)', skillDescUp3:'4회 공격시: [진화] 왕의 귀환 (전체 무적 및 공격력 증가)', isGacha: false },
+  untactHorror: { id:'untactHorror', name:'니엄마 전화', title:'비대면 공포', emoji:'📱', rarity:'Mystic', cost:330, hp:3000, maxHp:3000, damage:160, range:200, attackSpeed:1.0, color:'#000', projectileType:'magic', skillTrigger:4, skillDesc:'4회 공격시: 통신 끊김 (적 전체 정지)', skillDescUp3:'4회 공격시: [진화] 저주받은 영상 (적 즉사급 피해)', isGacha: true },
+  dimBreaker: { id:'dimBreaker', name:'엄마 파괴자', title:'붕괴의 주역', emoji:'💥', rarity:'Celestial', cost:520, hp:7000, maxHp:7000, damage:350, range:180, attackSpeed:0.8, color:'#5e35b1', projectileType:'magic', splashRadius: 60, skillTrigger:3, skillDesc:'3회 공격시: 차원 균열', skillDescUp3:'3회 공격시: [진화] 세계선 붕괴 (초거대 폭발)', isGacha: false },
+
+  // 🔥 추가된 코믹/밈 영웅 40종 🔥
+  doHyeonMom: { id: 'doHyeonMom', name: '도현이 에미', title: '분노한 어머니', emoji: '👩‍🦱', rarity: 'SSR', cost: 250, hp: 2000, maxHp: 2000, damage: 150, range: 120, attackSpeed: 1.5, color: '#f44336', projectileType: 'magic', skillTrigger: 5, skillDesc: '5회 공격: 등짝 스매싱', skillDescUp3: '5회 공격: [진화] 호적 파버리기 (즉사급 데미지)', isGacha: true },
+  yeJin: { id: 'yeJin', name: '예진이', title: '몸팔매년', emoji: '👱‍♀️', rarity: 'SR', cost: 150, hp: 1000, maxHp: 1000, damage: 80, range: 100, attackSpeed: 2.0, color: '#e91e63', projectileType: 'sword', skillTrigger: 6, skillDesc: '6회 공격: 팩트 폭력', skillDescUp3: '6회 공격: [진화] 멘탈 붕괴 (광역 스턴)', isGacha: true },
+  yeJeong: { id: 'yeJeong', name: '예정이', title: '시훈아 언제 와..', emoji: '📱', rarity: 'Rare', cost: 100, hp: 800, maxHp: 800, damage: 50, range: 150, attackSpeed: 1.0, color: '#9c27b0', projectileType: 'magic', skillTrigger: 4, skillDesc: '4회 공격: 읽고 씹기', skillDescUp3: '4회 공격: [진화] 차단하기 (적 이속 감소)', isGacha: true },
+  pregYeJin: { id: 'pregYeJin', name: '임신한 예진이', title: '예민함 MAX', emoji: '🤰', rarity: 'Mystic', cost: 350, hp: 3000, maxHp: 3000, damage: 250, range: 140, attackSpeed: 1.2, color: '#ff4081', projectileType: 'magic', skillTrigger: 3, skillDesc: '3회 공격: 입덧 폭발', skillDescUp3: '3회 공격: [진화] 산후 우울증 (광역 파멸 데미지)', isGacha: true },
+  pregYeJeong: { id: 'pregYeJeong', name: '임신한 예정이', title: '태교 중', emoji: '🤰', rarity: 'SSR', cost: 280, hp: 2500, maxHp: 2500, damage: 120, range: 180, attackSpeed: 1.5, color: '#ce93d8', projectileType: 'magic', skillTrigger: 5, skillDesc: '5회 공격: 모차르트 이펙트', skillDescUp3: '5회 공격: [진화] 초음파 공격 (적 전체 혼란)', isGacha: true },
+  pregDoHyeon: { id: 'pregDoHyeon', name: '임신한 도현이', title: '생물학적 기적', emoji: '🫃', rarity: 'Secret', cost: 600, hp: 15000, maxHp: 15000, damage: 800, range: 200, attackSpeed: 0.8, color: '#b71c1c', projectileType: 'magic', skillTrigger: 4, skillDesc: '4회 공격: 혼돈의 탄생', skillDescUp3: '4회 공격: [진화] 세계관 붕괴 (적 전체 체력 50% 증발)', isGacha: false },
+  baldDoHyeon: { id: 'baldDoHyeon', name: '탈모온 도현이', title: '빛나는 머리', emoji: '👨‍🦲', rarity: 'SR', cost: 180, hp: 1200, maxHp: 1200, damage: 90, range: 160, attackSpeed: 1.0, color: '#fff59d', projectileType: 'magic', skillTrigger: 5, skillDesc: '5회 공격: 눈부심 (실명)', skillDescUp3: '5회 공격: [진화] 태양권 (광역 스턴)', isGacha: true },
+  exGirlfriend: { id: 'exGirlfriend', name: '임신한 너희 엄마 키우기', title: '새벽 2시의 악몽', emoji: '🤳', rarity: 'Rare', cost: 120, hp: 900, maxHp: 900, damage: 60, range: 200, attackSpeed: 1.2, color: '#f48fb1', projectileType: 'arrow', skillTrigger: 6, skillDesc: '6회 공격: "자니?"', skillDescUp3: '6회 공격: [진화] 미련 폭발 (지속 데미지)', isGacha: true },
+  exBoyfriend: { id: 'exBoyfriend', name: '나에미', title: '질척거림', emoji: '🧟‍♂️', rarity: 'Uncommon', cost: 80, hp: 1500, maxHp: 1500, damage: 30, range: 80, attackSpeed: 0.8, color: '#90caf9', projectileType: 'sword', skillTrigger: 5, skillDesc: '5회 공격: 바짓가랑이 잡기', skillDescUp3: '5회 공격: [진화] 환승 이별 (아군 쉴드)', isGacha: true },
+  gradStudent: { id: 'gradStudent', name: '대학원생', title: '노예', emoji: '🧟', rarity: 'SSR', cost: 220, hp: 500, maxHp: 500, damage: 150, range: 150, attackSpeed: 2.5, color: '#607d8b', projectileType: 'magic', skillTrigger: 8, skillDesc: '8회 공격: 밤샘 코딩', skillDescUp3: '8회 공격: [진화] 논문 디펜스 (적 삭제)', isGacha: true },
+  angryProfessor: { id: 'angryProfessor', name: '분노한 교수님', title: 'F 폭격기', emoji: '👨‍🏫', rarity: 'Mystic', cost: 320, hp: 2000, maxHp: 2000, damage: 300, range: 250, attackSpeed: 0.9, color: '#455a64', projectileType: 'magic', skillTrigger: 3, skillDesc: '3회 공격: 재수강 알림', skillDescUp3: '3회 공격: [진화] 학사 경고 (초광역 폭격)', isGacha: true },
+  gymRat: { id: 'gymRat', name: '세트', title: '단백질 중독', emoji: '🏋️', rarity: 'SR', cost: 170, hp: 4000, maxHp: 4000, damage: 100, range: 80, attackSpeed: 0.5, color: '#795548', projectileType: 'sword', skillTrigger: 5, skillDesc: '5회 공격: 3대 500 빔', skillDescUp3: '5회 공격: [진화] 프로틴 스플래시 (근방 아군 회복+공증)', isGacha: true },
+  mintChoco: { id: 'mintChoco', name: '컵케익 성애자', title: '호불호의 화신', emoji: '🍦', rarity: 'Rare', cost: 110, hp: 800, maxHp: 800, damage: 55, range: 140, attackSpeed: 1.5, color: '#00bfa5', projectileType: 'magic', skillTrigger: 4, skillDesc: '4회 공격: 치약맛 공격', skillDescUp3: '4회 공격: [진화] 민초 억지로 먹이기 (독 데미지)', isGacha: true },
+  hawaiianPizza: { id: 'hawaiianPizza', name: '하와이안 피자', title: '따뜻한 파인애플', emoji: '🍕', rarity: 'Uncommon', cost: 90, hp: 700, maxHp: 700, damage: 45, range: 130, attackSpeed: 1.2, color: '#ffb300', projectileType: 'magic', skillTrigger: 5, skillDesc: '5회 공격: 과일 투척', skillDescUp3: '5회 공격: [진화] 이탈리아인의 분노 (화염 데미지)', isGacha: true },
+  gukbap: { id: 'gukbap', name: '마라탕후루', title: '가성비 마스터', emoji: '🍲', rarity: 'Common', cost: 30, hp: 1200, maxHp: 1200, damage: 10, range: 70, attackSpeed: 1.0, color: '#d84315', projectileType: 'sword', skillTrigger: 10, skillDesc: '10회 공격: "그 돈이면 국밥이 몇 그릇이야"', skillDescUp3: '10회 공격: [진화] 깍두기 국물 붓기 (방어력 무시)', isGacha: true },
+  pourSauce: { id: 'pourSauce', name: '부먹파', title: '촉촉한 도현이', emoji: '🥣', rarity: 'Rare', cost: 130, hp: 1100, maxHp: 1100, damage: 40, range: 110, attackSpeed: 1.5, color: '#8d6e63', projectileType: 'magic', splashRadius: 40, skillTrigger: 4, skillDesc: '4회 공격: 소스 붓기', skillDescUp3: '4회 공격: [진화] 눅눅해진 튀김옷 (광역 이속 저하)', isGacha: true },
+  dipSauce: { id: 'dipSauce', name: '소스를 묻히는 방법을 알려주겠다', title: '바삭함의 도현이 좆', emoji: '🥢', rarity: 'Rare', cost: 130, hp: 900, maxHp: 900, damage: 70, range: 110, attackSpeed: 1.5, color: '#ffca28', projectileType: 'sword', skillTrigger: 4, skillDesc: '4회 공격: 바삭한 일격', skillDescUp3: '4회 공격: [진화] 소스 묻히기 거부 (단일 극딜)', isGacha: true },
+  angryMom: { id: 'angryMom', name: '에미', title: '비교 대상', emoji: '🥇', rarity: 'SSR', cost: 260, hp: 1800, maxHp: 1800, damage: 180, range: 150, attackSpeed: 1.2, color: '#fbc02d', projectileType: 'magic', skillTrigger: 5, skillDesc: '5회 공격: 성적표 자랑', skillDescUp3: '5회 공격: [진화] 완벽주의 (적 전체 사기 저하)', isGacha: true },
+  jammin: { id: 'jammin', name: '무개념 잼민이', title: '킹받쥬?', emoji: '👦', rarity: 'SR', cost: 160, hp: 600, maxHp: 600, damage: 120, range: 180, attackSpeed: 2.0, color: '#ff9800', projectileType: 'arrow', skillTrigger: 3, skillDesc: '3회 공격: 어쩔티비', skillDescUp3: '3회 공격: [진화] 저쩔티비 쿠쿠루삥뽕 (광역 혼란)', isGacha: true },
+  keyboardWarrior: { id: 'keyboardWarrior', name: '키보드 워리어', title: '방구석 여포', emoji: '⌨️', rarity: 'Rare', cost: 140, hp: 400, maxHp: 400, damage: 150, range: 250, attackSpeed: 2.5, color: '#424242', projectileType: 'magic', skillTrigger: 10, skillDesc: '10회 공격: 악플 세례', skillDescUp3: '10회 공격: [진화] 패드립 (단일 즉사급 타격)', isGacha: true },
+  cryptoLoser: { id: 'cryptoLoser', name: '우세계 주식', title: '나락행 열차', emoji: '📉', rarity: 'Uncommon', cost: 70, hp: 2000, maxHp: 2000, damage: 10, range: 90, attackSpeed: 0.5, color: '#0d47a1', projectileType: 'sword', skillTrigger: 5, skillDesc: '5회 공격: 구조대 요청', skillDescUp3: '5회 공격: [진화] 한강 수온 체크 (자폭 딜)', isGacha: true },
+  yasuoScience: { id: 'yasuoScience', name: '과학의 야스오', title: '0/10/0', emoji: '🗡️', rarity: 'Rare', cost: 150, hp: 500, maxHp: 500, damage: 200, range: 100, attackSpeed: 2.0, color: '#00acc1', projectileType: 'sword', skillTrigger: 7, skillDesc: '7회 공격: 하세기!', skillDescUp3: '7회 공격: [진화] 데스 스파이크 (데스가 늘수록 강해지는 환상)', isGacha: true },
+  pregYasuo: { id: 'pregYasuo', name: '임신한 야스오', title: '바람의 잉태', emoji: '🤰', rarity: 'SSR', cost: 280, hp: 2500, maxHp: 2500, damage: 180, range: 130, attackSpeed: 1.8, color: '#00838f', projectileType: 'sword', skillTrigger: 4, skillDesc: '4회 공격: 소리아게돈', skillDescUp3: '4회 공격: [진화] 폭풍의 출산 (에어본 무한 유지)', isGacha: true },
+  teemo: { id: 'teemo', name: '티모충', title: '웃음 벨', emoji: '🍄', rarity: 'SR', cost: 160, hp: 700, maxHp: 700, damage: 60, range: 200, attackSpeed: 1.5, color: '#558b2f', projectileType: 'arrow', skillTrigger: 4, skillDesc: '4회 공격: 독침', skillDescUp3: '4회 공격: [진화] 버섯 밭 (지나가는 적 모두 독)', isGacha: true },
+  pregTeemo: { id: 'pregTeemo', name: '임신한 티모', title: '생태계 교란', emoji: '🤰', rarity: 'Mystic', cost: 330, hp: 2800, maxHp: 2800, damage: 140, range: 220, attackSpeed: 1.5, color: '#33691e', projectileType: 'arrow', skillTrigger: 3, skillDesc: '3회 공격: 임산부의 독', skillDescUp3: '3회 공격: [진화] 포자 번식 (맵 전체를 버섯으로 덮음)', isGacha: true },
+  pregWooseok: { id: 'pregWooseok', name: '임신한 정우석', title: '어드민의 비밀', emoji: '🤰', rarity: 'Celestial', cost: 555, hp: 9999, maxHp: 9999, damage: 999, range: 300, attackSpeed: 1.2, color: '#ffd700', projectileType: 'magic', skillTrigger: 3, skillDesc: '3회 공격: 어드민 권한 오남용', skillDescUp3: '3회 공격: [진화] 치트키 출산 (적 전체 골드 변환)', isGacha: false },
+  overtimeWorker: { id: 'overtimeWorker', name: '야근하는 김대리', title: '수면 부족', emoji: '🧟‍♂️', rarity: 'Uncommon', cost: 80, hp: 1200, maxHp: 1200, damage: 40, range: 100, attackSpeed: 0.8, color: '#546e7a', projectileType: 'sword', skillTrigger: 6, skillDesc: '6회 공격: 카페인 투여', skillDescUp3: '6회 공격: [진화] 퇴사 마려움 (일시적 공속 5배)', isGacha: true },
+  unemployed: { id: 'unemployed', name: '명절날 온 친척', title: '명절 브레이커', emoji: '🩳', rarity: 'Common', cost: 40, hp: 2000, maxHp: 2000, damage: 5, range: 50, attackSpeed: 0.5, color: '#ffb74d', projectileType: 'sword', skillTrigger: 10, skillDesc: '10회 공격: 잔소리 방어', skillDescUp3: '10회 공격: [진화] 용돈 요구 (타격 시 골드 획득)', isGacha: true },
+  pidgeonMom: { id: 'pidgeonMom', name: '비둘기 맘', title: '구구구구', emoji: '🐦', rarity: 'Rare', cost: 110, hp: 600, maxHp: 600, damage: 30, range: 160, attackSpeed: 2.0, color: '#9e9e9e', projectileType: 'magic', skillTrigger: 5, skillDesc: '5회 공격: 모이 뿌리기', skillDescUp3: '5회 공격: [진화] 조류 군단 소환 (광역 쪼기)', isGacha: true },
+  drunkMister: { id: 'drunkMister', name: '길바닥 취객', title: '네발 짐승', emoji: '🍺', rarity: 'Uncommon', cost: 70, hp: 3000, maxHp: 3000, damage: 20, range: 60, attackSpeed: 0.6, color: '#dce775', projectileType: 'sword', skillTrigger: 4, skillDesc: '4회 공격: 토사물 투척', skillDescUp3: '4회 공격: [진화] 진상 부리기 (적 기절)', isGacha: true },
+  blindDate: { id: 'blindDate', name: '소개팅 폭탄', title: '갑분싸', emoji: '💣', rarity: 'Rare', cost: 130, hp: 800, maxHp: 800, damage: 150, range: 120, attackSpeed: 0.5, color: '#000000', projectileType: 'magic', skillTrigger: 1, skillDesc: '1회 공격: 어색한 침묵', skillDescUp3: '1회 공격: [진화] 집에 간다고 하기 (적 도망감)', isGacha: true },
+  teamKillTroll: { id: 'teamKillTroll', name: '팀킬 트롤러', title: '우물 잠수', emoji: '🤡', rarity: 'Mystic', cost: 300, hp: 100, maxHp: 100, damage: 500, range: 300, attackSpeed: 0.5, color: '#ff5252', projectileType: 'magic', skillTrigger: 2, skillDesc: '2회 공격: 아군 방해', skillDescUp3: '2회 공격: [진화] 적에게 힐 주기 (하지만 버그로 딜 들어감)', isGacha: true },
+  midSchooler: { id: 'midSchooler', name: '중2병 환자', title: '흑염룡의 주인', emoji: '🐉', rarity: 'SR', cost: 190, hp: 900, maxHp: 900, damage: 110, range: 170, attackSpeed: 1.1, color: '#ba68c8', projectileType: 'magic', skillTrigger: 5, skillDesc: '5회 공격: 크큭... 파괴한다', skillDescUp3: '5회 공격: [진화] 내 안의 어둠 (광역 암흑 데미지)', isGacha: true },
+  hungryGamer: { id: 'hungryGamer', name: '컵라면 먹는 겜창', title: 'PC방 지박령', emoji: '🍜', rarity: 'Rare', cost: 120, hp: 800, maxHp: 800, damage: 80, range: 140, attackSpeed: 1.4, color: '#ffb74d', projectileType: 'arrow', skillTrigger: 6, skillDesc: '6회 공격: 국물 튀기기', skillDescUp3: '6회 공격: [진화] 샷건 치기 (지진 효과)', isGacha: true },
+  noisyNeighbor: { id: 'noisyNeighbor', name: '윗집 발망치', title: '층간소음', emoji: '🦶', rarity: 'SR', cost: 180, hp: 1500, maxHp: 1500, damage: 100, range: 100, attackSpeed: 0.8, color: '#8d6e63', projectileType: 'sword', skillTrigger: 3, skillDesc: '3회 공격: 쿵쿵따', skillDescUp3: '3회 공격: [진화] 새벽 2시 청소기 (광역 스턴+데미지)', isGacha: true },
+  noConcept: { id: 'noConcept', name: '진상 손님', title: '매니저 불러!', emoji: '🗣️', rarity: 'SR', cost: 170, hp: 2000, maxHp: 2000, damage: 50, range: 150, attackSpeed: 1.0, color: '#e57373', projectileType: 'magic', skillTrigger: 5, skillDesc: '5회 공격: 컴플레인', skillDescUp3: '5회 공격: [진화] 환불 요구 (적 골드 뺏기)', isGacha: true },
+  pregZombie: { id: 'pregZombie', name: '임신한 좀빈이', title: '역병의 어머니', emoji: '🤰', rarity: 'Mystic', cost: 380, hp: 20000, maxHp: 20000, damage: 800, range: 160, attackSpeed: 2.0, color: '#cddc39', projectileType: 'magic', skillTrigger: 3, skillDesc: '3회 공격: 좀비 베이비 사출', skillDescUp3: '3회 공격: [진화] 무한 증식 (화면 전체 맹독+감염)', isGacha: true },
+  pregAbiwena: { id: 'pregAbiwena', name: '임신한 아비웨나', title: '엔드필드의 탄생', emoji: '🤰', rarity: 'Celestial', cost: 600, hp: 8000, maxHp: 8000, damage: 450, range: 180, attackSpeed: 1.5, color: '#f06292', projectileType: 'sword', skillTrigger: 4, skillDesc: '4회 공격: 생명의 공간 베기', skillDescUp3: '4회 공격: [진화] 신인류 창세 (맵 전체 삭제 후 리셋 딜)', isGacha: false },
+  dohyeonDad: { id: 'dohyeonDad', name: '도현이 아비', title: '가장의 무게', emoji: '👨', rarity: 'SSR', cost: 260, hp: 3000, maxHp: 3000, damage: 140, range: 130, attackSpeed: 1.0, color: '#795548', projectileType: 'sword', skillTrigger: 5, skillDesc: '5회 공격: 벨트 풀기', skillDescUp3: '5회 공격: [진화] 호통 치기 (적 전체 공포)', isGacha: true },
+  dogPoop: { id: 'dogPoop', name: '길가다 밟은 개똥', title: '재수없음', emoji: '💩', rarity: 'Common', cost: 10, hp: 100, maxHp: 100, damage: 1, range: 50, attackSpeed: 1.0, color: '#795548', projectileType: 'magic', skillTrigger: 10, skillDesc: '10회 공격: 냄새 피우기', skillDescUp3: '10회 공격: [진화] 신발 버리기 (광역 불쾌감)', isGacha: true },
+  
+  // 8성 영웅
+  legendaryKing: { id: 'legendaryKing', name: '전설의 왕', title: '황금빛 왕관', emoji: '👑', rarity: '8★', cost: 800, hp: 10000, maxHp: 10000, damage: 500, range: 180, attackSpeed: 1.3, color: '#ffd700', projectileType: 'magic', skillTrigger: 5, skillDesc: '5회 공격: 왕의 심판', skillDescUp3: '5회 공격: [진화] 황금 폭주', isGacha: true },
+  
+  // 12성 영웅
+  divineBeing: { id: 'divineBeing', name: '신의 화신', title: '절대자', emoji: '⚡', rarity: '12★', cost: 2000, hp: 100000, maxHp: 100000, damage: 2000, range: 300, attackSpeed: 2.0, color: '#ff00ff', projectileType: 'magic', skillTrigger: 3, skillDesc: '3회 공격: 신의 분노', skillDescUp3: '3회 공격: [진화] 세계 재창조', isGacha: false },
+
+  // ===== 유닉 31마리 (다양성 테마) =====
+  // Uncommon 10마리
+  unstoppableTank: { id: 'unstoppableTank', name: '불굴의 보호자', title: '강철의 의지', emoji: '🛡️', rarity: 'Uncommon', cost: 150, hp: 8000, damage: 120, range: 50, attackSpeed: 0.8, color: '#1976d2', projectileType: 'sword', skillTrigger: 5, skillDesc: '5회 공격: 주변 모두 방어 상향', skillDescUp3: '[진화] 완벽한 방어 형성', isGacha: true },
+  silentAssassin: { id: 'silentAssassin', name: '침묵의 암살자', title: '정확한 일격', emoji: '🗡️', rarity: 'Uncommon', cost: 140, hp: 4500, damage: 450, range: 150, attackSpeed: 2.0, color: '#424242', projectileType: 'dagger', skillTrigger: 4, skillDesc: '4회 공격: 적 뒤에 순간이동', skillDescUp3: '[진화] 무음의 칼', isGacha: true },
+  mindfulMage: { id: 'mindfulMage', name: '마음의 마법사', title: '천재 마술사', emoji: '🧙', rarity: 'Uncommon', cost: 160, hp: 5000, damage: 380, range: 200, attackSpeed: 1.5, color: '#6a1b9a', projectileType: 'magic', skillTrigger: 3, skillDesc: '3회 공격: 강력한 마법탄 3개 발사', skillDescUp3: '[진화] 마법 소용돌이', isGacha: true },
+  visionSeer: { id: 'visionSeer', name: '영혼의 안내자', title: '밝은 빛', emoji: '👁️', rarity: 'Uncommon', cost: 130, hp: 4000, damage: 200, range: 250, attackSpeed: 1.2, color: '#d4af37', projectileType: 'magic', skillTrigger: 6, skillDesc: '6회 공격: 모든 아군 치명타 확률 증가', skillDescUp3: '[진화] 신의 시야', isGacha: true },
+  compassionateHealer: { id: 'compassionateHealer', name: '따뜻한 치유사', title: '사랑의 손길', emoji: '💚', rarity: 'Uncommon', cost: 145, hp: 5500, damage: 150, range: 200, attackSpeed: 1.0, color: '#4caf50', projectileType: 'magic', skillTrigger: 4, skillDesc: '4회 공격: 체력 낮은 아군 회복', skillDescUp3: '[진화] 생명의 샘', isGacha: true },
+  harmonyArcher: { id: 'harmonyArcher', name: '화음의 궁수', title: '완벽한 박자', emoji: '🏹', rarity: 'Uncommon', cost: 135, hp: 4800, damage: 350, range: 180, attackSpeed: 1.8, color: '#00897b', projectileType: 'arrow', skillTrigger: 5, skillDesc: '5회 공격: 모든 투사체 강화', skillDescUp3: '[진화] 조화의 화살', isGacha: true },
+  creativeArtisan: { id: 'creativeArtisan', name: '창의의 장인', title: '기술의 거장', emoji: '🔨', rarity: 'Uncommon', cost: 155, hp: 6000, damage: 280, range: 120, attackSpeed: 1.3, color: '#d2691e', projectileType: 'sword', skillTrigger: 4, skillDesc: '4회 공격: 도구 강화 장치 가동', skillDescUp3: '[진화] 완벽 제작', isGacha: true },
+  resilientWarrior: { id: 'resilientWarrior', name: '회복력 있는 전사', title: '불굴의 정신', emoji: '⚔️', rarity: 'Uncommon', cost: 150, hp: 7000, damage: 320, range: 80, attackSpeed: 1.2, color: '#c41c3b', projectileType: 'sword', skillTrigger: 5, skillDesc: '5회 공격: 피해받은 만큼 회복', skillDescUp3: '[진화] 무한 재생', isGacha: true },
+  logicalScholar: { id: 'logicalScholar', name: '이성의 학자', title: '지혜로운 사상가', emoji: '📚', rarity: 'Uncommon', cost: 140, hp: 4700, damage: 290, range: 200, attackSpeed: 1.4, color: '#1a237e', projectileType: 'magic', skillTrigger: 4, skillDesc: '4회 공격: 적군 약점 분석 및 피해 증가', skillDescUp3: '[진화] 완벽 해석', isGacha: true },
+  unitedLeader: { id: 'unitedLeader', name: '연대의 지도자', title: '모두를 위해', emoji: '👥', rarity: 'Uncommon', cost: 160, hp: 6500, damage: 250, range: 100, attackSpeed: 1.1, color: '#388e3c', projectileType: 'magic', skillTrigger: 3, skillDesc: '3회 공격: 아군 모두 강화', skillDescUp3: '[진화] 완벽한 협력', isGacha: true },
+
+  // Rare 10마리
+  steadyGuardian: { id: 'steadyGuardian', name: '변하지 않는 수호자', title: '영원한 방어', emoji: '🏰', rarity: 'Rare', cost: 250, hp: 15000, damage: 200, range: 60, attackSpeed: 0.9, color: '#01579b', projectileType: 'sword', skillTrigger: 6, skillDesc: '6회 공격: 전체 아군 보호막 생성', skillDescUp3: '[진화] 절대 방어막', isGacha: true },
+  swiftThinker: { id: 'swiftThinker', name: '재빠른 사고가', title: '순발력의 달인', emoji: '⚡', rarity: 'Rare', cost: 240, hp: 6500, damage: 650, range: 120, attackSpeed: 2.5, color: '#f57f17', projectileType: 'arrow', skillTrigger: 3, skillDesc: '3회 공격: 2배 빠르게 공격', skillDescUp3: '[진화] 초고속 연격', isGacha: true },
+  nurturingSpirit: { id: 'nurturingSpirit', name: '양육의 정령', title: '성장의 손길', emoji: '🌿', rarity: 'Rare', cost: 260, hp: 8000, damage: 300, range: 200, attackSpeed: 1.3, color: '#2e7d32', projectileType: 'magic', skillTrigger: 4, skillDesc: '4회 공격: 아군 능력치 향상', skillDescUp3: '[진화] 완전한 성장', isGacha: true },
+  adaptiveSage: { id: 'adaptiveSage', name: '적응하는 현자', title: '변화에 강한', emoji: '🔮', rarity: 'Rare', cost: 245, hp: 7500, damage: 400, range: 180, attackSpeed: 1.4, color: '#5e35b1', projectileType: 'magic', skillTrigger: 4, skillDesc: '4회 공격: 적 특성 감지 후 적응', skillDescUp3: '[진화] 완벽 적응', isGacha: true },
+  joyfulBard: { id: 'joyfulBard', name: '기쁨의 음유시인', title: '행복의 선율', emoji: '🎵', rarity: 'Rare', cost: 230, hp: 5500, damage: 350, range: 200, attackSpeed: 1.6, color: '#c2185b', projectileType: 'magic', skillTrigger: 5, skillDesc: '5회 공격: 모든 아군 회복 + 버프', skillDescUp3: '[진화] 축제의 노래', isGacha: true },
+  steadyBuilder: { id: 'steadyBuilder', name: '착실한 건설가', title: '견고한 터전', emoji: '🔧', rarity: 'Rare', cost: 250, hp: 9000, damage: 280, range: 100, attackSpeed: 1.2, color: '#bf360c', projectileType: 'sword', skillTrigger: 5, skillDesc: '5회 공격: 방어 구조물 강화', skillDescUp3: '[진화] 무적 요새', isGacha: true },
+  intuitiveEmpath: { id: 'intuitiveEmpath', name: '직관의 공감자', title: '마음의 울림', emoji: '💜', rarity: 'Rare', cost: 240, hp: 7000, damage: 330, range: 200, attackSpeed: 1.3, color: '#880e4f', projectileType: 'magic', skillTrigger: 4, skillDesc: '4회 공격: 적 정신 공격', skillDescUp3: '[진화] 절대 공감', isGacha: true },
+  persistentVoyager: { id: 'persistentVoyager', name: '끈기의 여행자', title: '끝없는 여정', emoji: '🚀', rarity: 'Rare', cost: 255, hp: 8500, damage: 380, range: 150, attackSpeed: 1.5, color: '#0d47a1', projectileType: 'magic', skillTrigger: 3, skillDesc: '3회 공격: 무한 이동 능력', skillDescUp3: '[진화] 우주 항해', isGacha: true },
+  gracefulAcrobat: { id: 'gracefulAcrobat', name: '우아한 곡예사', title: '완벽한 몸짓', emoji: '🎪', rarity: 'Rare', cost: 235, hp: 6000, damage: 420, range: 130, attackSpeed: 1.9, color: '#ff6d00', projectileType: 'arrow', skillTrigger: 4, skillDesc: '4회 공격: 회피 능력 극대화', skillDescUp3: '[진화] 무적 피하기', isGacha: true },
+
+  // SR 8마리
+  wisdomKeeper: { id: 'wisdomKeeper', name: '지혜의 수호자', title: '고대의 비밀', emoji: '🧠', rarity: 'SR', cost: 600, hp: 12000, damage: 600, range: 200, attackSpeed: 1.4, color: '#1565c0', projectileType: 'magic', skillTrigger: 3, skillDesc: '3회 공격: 모든 공격 치명타', skillDescUp3: '[진화] 절대 지혜', isGacha: true },
+  courageousSoul: { id: 'courageousSoul', name: '용감한 영혼', title: '맞서는 용기', emoji: '🔥', rarity: 'SR', cost: 590, hp: 11000, damage: 700, range: 100, attackSpeed: 1.7, color: '#d32f2f', projectileType: 'sword', skillTrigger: 4, skillDesc: '4회 공격: 적군 도발 + 제압', skillDescUp3: '[진화] 절대 용기', isGacha: true },
+  luminousBeing: { id: 'luminousBeing', name: '빛나는 존재', title: '광명의 화신', emoji: '✨', rarity: 'SR', cost: 610, hp: 13000, damage: 550, range: 250, attackSpeed: 1.3, color: '#f57f17', projectileType: 'magic', skillTrigger: 3, skillDesc: '3회 공격: 맵 전체 조명', skillDescUp3: '[진화] 절대 광명', isGacha: true },
+  tranquilNinja: { id: 'tranquilNinja', name: '침착한 닌자', title: '정적의 검', emoji: '🥷', rarity: 'SR', cost: 580, hp: 7500, damage: 900, range: 100, attackSpeed: 2.2, color: '#1b1b1b', projectileType: 'dagger', skillTrigger: 2, skillDesc: '2회 공격: 적 3명 동시 제거', skillDescUp3: '[진화] 죽음의 그림자', isGacha: true },
+  nourisher: { id: 'nourisher', name: '영양 공급자', title: '생명의 원천', emoji: '🌊', rarity: 'SR', cost: 595, hp: 14000, damage: 400, range: 220, attackSpeed: 1.1, color: '#00838f', projectileType: 'magic', skillTrigger: 4, skillDesc: '4회 공격: 전체 아군 완전 회복', skillDescUp3: '[진화] 영원한 생명수', isGacha: true },
+  perfectBalance: { id: 'perfectBalance', name: '완벽한 균형', title: '동등함', emoji: '⚖️', rarity: 'SR', cost: 600, hp: 10000, damage: 550, range: 150, attackSpeed: 1.5, color: '#6a1b9a', projectileType: 'magic', skillTrigger: 3, skillDesc: '3회 공격: 상황에 맞는 능력 발동', skillDescUp3: '[진화] 완벽 조화', isGacha: true },
+  boundlessSpirit: { id: 'boundlessSpirit', name: '한계 없는 정신', title: '무한 가능', emoji: '🌟', rarity: 'SR', cost: 605, hp: 9000, damage: 650, range: 180, attackSpeed: 1.6, color: '#ff6d00', projectileType: 'magic', skillTrigger: 3, skillDesc: '3회 공격: 능력치 무한 증가', skillDescUp3: '[진화] 무한 초월', isGacha: true },
+
+  // SSR 2마리
+  inclusiveChampion: { id: 'inclusiveChampion', name: '포용의 챔피언', title: '모두의 영웅', emoji: '👑', rarity: 'SSR', cost: 1200, hp: 20000, damage: 800, range: 200, attackSpeed: 1.8, color: '#00d4ff', projectileType: 'magic', splashRadius: 150, skillTrigger: 2, skillDesc: '2회 공격: 모든 아군 슈퍼 버프', skillDescUp3: '[진화] 절대 포용', isGacha: true },
+  diversityArtisan: { id: 'diversityArtisan', name: '다양성의 장인', title: '모든 색의 조화', emoji: '🎨', rarity: 'SSR', cost: 1220, hp: 18000, damage: 900, range: 180, attackSpeed: 1.9, color: '#ff00ff', projectileType: 'magic', splashRadius: 120, skillTrigger: 2, skillDesc: '2회 공격: 무지개 에너지 방출', skillDescUp3: '[진화] 우주 조화', isGacha: false },
+
+  // ===== Our_World 4마리 (각성 형태) =====
+  awakenJiHyeonBin: { id: 'awakenJiHyeonBin', name: '각성한 지현빈', title: '운명의 수호자', emoji: '🌙', rarity: 'Our_World', cost: 1500, hp: 25000, damage: 1200, range: 220, attackSpeed: 1.6, color: '#9c27b0', projectileType: 'magic', splashRadius: 180, skillTrigger: 2, skillDesc: '2회 공격: 밤의 힘으로 모든 적 약화', skillDescUp3: '[각성] 절대 검은밤', isGacha: false },
+  awakenJeongWooSeok: { id: 'awakenJeongWooSeok', name: '각성한 정우석', title: '빛의 지도자', emoji: '☀️', rarity: 'Our_World', cost: 1500, hp: 22000, damage: 1400, range: 250, attackSpeed: 1.8, color: '#ffd700', projectileType: 'magic', splashRadius: 200, skillTrigger: 2, skillDesc: '2회 공격: 태양의 축복으로 아군 강화', skillDescUp3: '[각성] 절대 광명', isGacha: false },
+  awakenJinKangGeon: { id: 'awakenJinKangGeon', name: '각성한 진강건', title: '폭발의 왕', emoji: '💥', rarity: 'Our_World', cost: 1450, hp: 18000, damage: 1600, range: 150, attackSpeed: 2.0, color: '#ff5722', projectileType: 'magic', splashRadius: 160, skillTrigger: 2, skillDesc: '2회 공격: 폭렬의 마법 폭발', skillDescUp3: '[각성] 세계 파괴', isGacha: false },
+  awakenKimSiHu: { id: 'awakenKimSiHu', name: '각성한 김시후', title: '바람의 정령', emoji: '💨', rarity: 'Our_World', cost: 1480, hp: 20000, damage: 1300, range: 200, attackSpeed: 2.2, color: '#00bcd4', projectileType: 'magic', splashRadius: 170, skillTrigger: 2, skillDesc: '2회 공격: 회오리 소용돌이로 적군 제압', skillDescUp3: '[각성] 절대 폭풍', isGacha: false }
+};
+
+const ENEMIES = {
+  dohyeonling: { name: '도현 졸개', emoji: '👹', hp: 50, speed: 0.9, gold: 6, color: '#8b4513', atkType: 'single', atkRange: 50, atkCd: 120, dmg: 5 },
+  dohyeonRunner: { name: '도현 척후병', emoji: '👺', hp: 40, speed: 1.8, gold: 8, color: '#a0522d', atkType: 'single', atkRange: 60, atkCd: 90, dmg: 8 },
+  dohyeonBrute: { name: '도현 광전사', emoji: '🧟', hp: 180, speed: 0.6, gold: 12, color: '#5d4037', atkType: 'circle', atkRange: 50, atkCd: 180, dmg: 20 },
+  dohyeonShaman: { name: '도현 주술사', emoji: '🧙', hp: 100, speed: 0.8, gold: 15, color: '#6a1b9a', atkType: 'full', atkRange: 999, atkCd: 300, dmg: 10, skill: 'heal', skillRange: 100, skillCooldown: 180 },
+  dohyeonKnight: { name: '도현 흑기사', emoji: '🦹', hp: 350, speed: 0.7, gold: 20, color: '#263238', armor: 3, atkType: 'line', atkRange: 120, atkCd: 180, dmg: 40 },
+  dohyeonReaper: { name: '도현 사신', emoji: '☠️', hp: 250, speed: 1.1, gold: 25, color: '#311b92', atkType: 'cone', atkRange: 100, atkCd: 150, dmg: 35 },
+  
+  // 5-6 stage 추가 몹
+  dohyeonDemon: { name: '도현 악마', emoji: '😈', hp: 400, speed: 1.0, gold: 30, color: '#d32f2f', armor: 5, atkType: 'circle', atkRange: 80, atkCd: 200, dmg: 60 },
+  dohyeonMutant: { name: '도현 변종', emoji: '👾', hp: 300, speed: 1.3, gold: 28, color: '#00796b', atkType: 'line', atkRange: 150, atkCd: 160, dmg: 50 },
+  dohyeonSpecter: { name: '도현 유령', emoji: '👻', hp: 180, speed: 1.4, gold: 22, color: '#bdbdbd', atkType: 'single', atkRange: 100, atkCd: 120, dmg: 35 },
+  dohyeonCorsair: { name: '도현 해적', emoji: '🏴‍☠️', hp: 280, speed: 1.2, gold: 26, color: '#1a237e', atkType: 'cone', atkRange: 110, atkCd: 140, dmg: 45 },
+  
+  // 추가 일반 몹들
+  goblinScout: { name: '고블린 정찰병', emoji: '🧌', hp: 35, speed: 1.5, gold: 7, color: '#9ccc65', atkType: 'single', atkRange: 50, atkCd: 100, dmg: 6 },
+  orcWarrior: { name: '오크 전사', emoji: '🦍', hp: 200, speed: 0.8, gold: 18, color: '#558b2f', atkType: 'circle', atkRange: 60, atkCd: 170, dmg: 25 },
+  elfArcher: { name: '엘프 궁수', emoji: '🏹', hp: 90, speed: 1.3, gold: 14, color: '#7cb342', atkType: 'line', atkRange: 150, atkCd: 130, dmg: 18 },
+  dwarfMiner: { name: '드워프 채굴꾼', emoji: '⛏️', hp: 220, speed: 0.7, gold: 21, color: '#d2691e', armor: 4, atkType: 'single', atkRange: 40, atkCd: 190, dmg: 32 },
+  trollBrute: { name: '트롤 야만인', emoji: '🗻', hp: 400, speed: 0.5, gold: 32, color: '#558b2f', armor: 8, atkType: 'circle', atkRange: 70, atkCd: 220, dmg: 55 },
+  spectralKnight: { name: '유령 기사', emoji: '⚔️', hp: 300, speed: 0.9, gold: 24, color: '#9575cd', atkType: 'line', atkRange: 120, atkCd: 160, dmg: 42 },
+  shadowMage: { name: '그림자 마법사', emoji: '🌑', hp: 130, speed: 1.0, gold: 17, color: '#424242', atkType: 'full', atkRange: 999, atkCd: 250, dmg: 22 },
+  infernalBeast: { name: '지옥 야수', emoji: '🔥', hp: 350, speed: 0.8, gold: 29, color: '#e64a19', armor: 6, atkType: 'circle', atkRange: 90, atkCd: 180, dmg: 48 },
+  frostWyvern: { name: '서리 비룡', emoji: '❄️', hp: 280, speed: 1.1, gold: 27, color: '#0277bd', atkType: 'cone', atkRange: 100, atkCd: 150, dmg: 40 },
+  lightningElemental: { name: '번개 정령', emoji: '⚡', hp: 150, speed: 1.6, gold: 19, color: '#ffeb3b', atkType: 'line', atkRange: 140, atkCd: 110, dmg: 28 },
+  stoneMalice: { name: '돌 악귀', emoji: '⬛', hp: 400, speed: 0.6, gold: 30, color: '#616161', armor: 10, atkType: 'single', atkRange: 50, atkCd: 200, dmg: 50 },
+  crimsonWolf: { name: '진홍 늑대', emoji: '🐺', hp: 160, speed: 1.4, gold: 16, color: '#c62828', atkType: 'single', atkRange: 80, atkCd: 100, dmg: 24 },
+  voidHunter: { name: '공허 사냥꾼', emoji: '🕷️', hp: 210, speed: 1.2, gold: 23, color: '#37474f', atkType: 'line', atkRange: 130, atkCd: 140, dmg: 36 },
+  cursedSkulls: { name: '저주받은 해골', emoji: '💀', hp: 100, speed: 0.9, gold: 13, color: '#1a1a1a', atkType: 'circle', atkRange: 60, atkCd: 130, dmg: 16 },
+  mistralWraith: { name: '바람 유령', emoji: '💨', hp: 120, speed: 1.7, gold: 15, color: '#80deea', atkType: 'single', atkRange: 70, atkCd: 90, dmg: 20 },
+  abyssalBlob: { name: '심해 점액', emoji: '💧', hp: 250, speed: 0.7, gold: 25, color: '#1a237e', atkType: 'full', atkRange: 999, atkCd: 280, dmg: 30 },
+  ironcladMorsel: { name: '철 갑충', emoji: '🪲', hp: 180, speed: 0.8, gold: 18, color: '#546e7a', armor: 5, atkType: 'single', atkRange: 45, atkCd: 150, dmg: 22 },
+  venom_Serpent: { name: '독사', emoji: '🐍', hp: 140, speed: 1.3, gold: 17, color: '#7cb342', atkType: 'single', atkRange: 60, atkCd: 110, dmg: 21 },
+  
+  // 보스
+  boss1: { name: '거대 고블린 족장', emoji: '👹', hp: 3000, speed: 0.5, gold: 150, color: '#e65100', boss: true, drop: 'boss1', atkType: 'circle', atkRange: 80, atkCd: 180, dmg: 80 },
+  boss2: { name: '오크 워로드', emoji: '🦍', hp: 7000, speed: 0.6, gold: 300, color: '#4e342e', boss: true, drop: 'boss2', atkType: 'cone', atkRange: 120, atkCd: 240, dmg: 120 },
+  boss3: { name: '죽음의 사신', emoji: '☠️', hp: 15000, speed: 0.9, gold: 500, color: '#311b92', boss: true, drop: 'boss3', atkType: 'line', atkRange: 200, atkCd: 180, dmg: 150 },
+  dohyeonLord: { name: '마왕 김도현', emoji: '👑', hp: 50000, speed: 0.4, gold: 1500, color: '#c62828', boss: true, drop: 'boss4', armor: 10, atkType: 'full', atkRange: 999, atkCd: 360, dmg: 250 },
+  dohyeonDemon: { name: '악마 왕', emoji: '😈', hp: 100000, speed: 0.5, gold: 2500, color: '#d32f2f', boss: true, drop: 'boss4', armor: 15, atkType: 'full', atkRange: 999, atkCd: 300, dmg: 350 },
+  dohyeonGodKing: { name: '신왕 도현', emoji: '⚔️', hp: 200000, speed: 0.6, gold: 5000, color: '#b71c1c', boss: true, drop: 'boss4', armor: 20, atkType: 'full', atkRange: 999, atkCd: 240, dmg: 500 },
+  challengeDohyeon: { name: '진·마왕 김도현', emoji: '👑', hp: 99999999, speed: 0.2, gold: 0, color: '#ff0000', boss: true, drop: 'boss4', armor: 50, atkType: 'full', atkRange: 999, atkCd: 180, dmg: 5000 }
+};
+
+const BOSS_ITEMS = { boss1: '고블린의 뿔', boss2: '광전사의 도끼', boss3: '사신의 망토', boss4: '마왕의 핵' };
+
+// 룬 시스템
+const RUNES = {
+  runeSlash: { id: 'runeSlash', name: '베기의 룬', emoji: '⚔️', rarity: 'Common', tier: 1, effect: 'ATK +10%', color: '#ff6b6b' },
+  runeMightSlash: { id: 'runeMightSlash', name: '강력한 베기', emoji: '⚔️', rarity: 'Uncommon', tier: 2, effect: 'ATK +25%', color: '#ff7043' },
+  runeGigaSlash: { id: 'runeGigaSlash', name: '기가 베기', emoji: '⚔️', rarity: 'Rare', tier: 3, effect: 'ATK +50%', color: '#f57c00' },
+  runeShield: { id: 'runeShield', name: '방어의 룬', emoji: '🛡️', rarity: 'Common', tier: 1, effect: 'DEF +10%', color: '#4db6ac' },
+  runeFortress: { id: 'runeFortress', name: '요새', emoji: '🛡️', rarity: 'Uncommon', tier: 2, effect: 'DEF +25%', color: '#26a69a' },
+  runeCastle: { id: 'runeCastle', name: '성벽', emoji: '🛡️', rarity: 'Rare', tier: 3, effect: 'DEF +50%', color: '#009688' },
+  runeRegen: { id: 'runeRegen', name: '재생의 룬', emoji: '💚', rarity: 'Uncommon', tier: 2, effect: '초당 HP 1% 회복', color: '#4caf50' },
+  runeCrit: { id: 'runeCrit', name: '치명타의 룬', emoji: '✨', rarity: 'Rare', tier: 3, effect: '치명타율 30%', color: '#ffd700' },
+  runeSpeedBoost: { id: 'runeSpeedBoost', name: '빠름의 룬', emoji: '⚡', rarity: 'Rare', tier: 3, effect: '공격속도 50%', color: '#ffeb3b' },
+  runeLifesteal: { id: 'runeLifesteal', name: '흡혈의 룬', emoji: '🦇', rarity: 'SR', tier: 4, effect: '피해의 30% 회복', color: '#ba68c8' }
+};
+
+const CRAFT_RECIPES = [
+  { heroId: 'abyssHyeonBin', req: { boss3: 15, boss4: 10, gold: 30000 } },
+  { heroId: 'awakenSiHoon2', req: { boss1: 30, boss2: 30, boss3: 30, boss4: 30, gem: 9999 } },
+  { heroId: 'kindredAwaken', req: { boss2: 20, boss4: 15, gold: 40000 } },
+  { heroId: 'yuumiAwaken', req: { boss1: 20, boss3: 20, gold: 35000 } },
+  { heroId: 'lionPaladin', req: { boss1: 15, boss4: 20, gold: 45000 } },
+  { heroId: 'dimBreaker', req: { boss3: 25, boss4: 25, gem: 5000 } }
+];
+
+const CHAPTERS = [];
+for (let stage = 1; stage <= 6; stage++) {
+  for (let sub = 1; sub <= 5; sub++) {
+    const id = `${stage}-${sub}`; const isBoss = (sub === 5); const waves = []; 
+    const baseHP = 1 + (stage-1)*0.8 + (sub-1)*0.2; const waveCount = 3 + sub;
+    for (let w = 0; w < waveCount; w++) {
+      const wave = { delay: 60, enemies: [] }; const count = 6 + w*2 + stage*2;
+      for (let i = 0; i < count; i++) {
+        let type = 'dohyeonling'; const r = Math.random();
+        if (stage >= 2 && r < 0.3) type = 'dohyeonRunner'; else if (stage >= 2 && r < 0.5) type = 'dohyeonBrute'; else if (stage >= 3 && r < 0.65) type = 'dohyeonShaman'; else if (stage >= 3 && r < 0.8) type = 'dohyeonKnight'; else if (stage >= 4 && r < 0.9) type = 'dohyeonReaper'; else if (stage >= 5 && r < 0.95) type = 'dohyeonDemon'; else if (stage >= 6 && r < 0.98) type = 'dohyeonMutant';
+        wave.enemies.push({ type, delay: 30 + Math.random()*30, hpMult: baseHP });
+      } waves.push(wave);
+    }
+    if (isBoss) {
+      const bossWave = { delay: 180, enemies: [] }; for (let i = 0; i < 5; i++) bossWave.enemies.push({ type: 'dohyeonKnight', delay: 30, hpMult: baseHP });
+      let bossType = stage === 1 ? 'boss1' : stage === 2 ? 'boss2' : stage === 3 ? 'boss3' : stage === 4 ? 'dohyeonLord' : stage === 5 ? 'dohyeonDemon' : 'dohyeonGodKing'; bossWave.enemies.push({ type: bossType, delay: 80, hpMult: 1 + (stage-1)*0.5 }); waves.push(bossWave);
+    }
+    CHAPTERS.push({ id, stage, sub, isBoss, name: isBoss ? `${stage}장 결전` : `${stage}-${sub}`, waves, reward: { gold: 100 + stage*50, gem: 5 + stage*2, scrap: 2 + stage } });
+  }
+}
+
+const PATHS = [
+  [{x:0,y:200},{x:300,y:200},{x:300,y:500},{x:700,y:500},{x:700,y:150},{x:1000,y:150}],
+  [{x:0,y:100},{x:250,y:100},{x:250,y:400},{x:500,y:400},{x:500,y:200},{x:750,y:200},{x:750,y:550},{x:1000,y:550}],
+  [{x:0,y:350},{x:200,y:350},{x:200,y:550},{x:800,y:550},{x:800,y:350},{x:1000,y:350}],
+  [{x:0,y:600},{x:200,y:600},{x:200,y:200},{x:500,y:200},{x:500,y:500},{x:800,y:500},{x:800,y:100},{x:1000,y:100}],
+  [{x:0,y:350},{x:400,y:350},{x:400,y:150},{x:600,y:150},{x:600,y:550},{x:400,y:550},{x:400,y:350},{x:1000,y:350}],
+  [{x:0,y:200},{x:100,y:200},{x:100,y:600},{x:400,y:600},{x:400,y:100},{x:700,y:100},{x:700,y:500},{x:1000,y:500}],
+  [{x:0,y:400},{x:300,y:400},{x:300,y:200},{x:700,y:200},{x:700,y:600},{x:1000,y:600}],
+  [{x:0,y:150},{x:500,y:150},{x:500,y:550},{x:200,y:550},{x:200,y:300},{x:800,y:300},{x:800,y:600},{x:1000,y:600}],
+];
+
+const STORAGE_KEY = 'crackOfDohyeon_accounts'; 
+const SESSION_KEY = 'crackOfDohyeon_session';
+const GLOBAL_KEY = 'crackOfDohyeon_global'; // 글로벌 데이터 (패치노트, 메일 등)
+
+function loadGlobalData() { try { const data = localStorage.getItem(GLOBAL_KEY); return data ? JSON.parse(data) : { patchNotes: "🎉 환영합니다! 공지사항이 아직 없습니다." }; } catch(e) { return { patchNotes: "" }; } }
+function saveGlobalData(data) { localStorage.setItem(GLOBAL_KEY, JSON.stringify(data)); }
+
+function loadAccounts() { try { const data = localStorage.getItem(STORAGE_KEY); return data ? JSON.parse(data) : {}; } catch(e) { return {}; } }
+function saveAccounts(accounts) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts)); } catch(e) {} }
+function saveSession(nickname) { try { localStorage.setItem(SESSION_KEY, nickname); } catch(e) {} }
+function loadSession() { try { return localStorage.getItem(SESSION_KEY); } catch(e) { return null; } }
+function clearSession() { try { localStorage.removeItem(SESSION_KEY); } catch(e) {} }
+
+function createNewAccount(nickname, pin) {
+  return {
+    nickname, pin, createdAt: Date.now(), gold: 1500, gem: 500, scrap: 50, bossItems: { boss1: 0, boss2: 0, boss3: 0, boss4: 0 },
+    ownedHeroes: { noviceAdv: true, jeongWooSeok: true }, deck: ['noviceAdv', 'jeongWooSeok'], clearedChapters: [], totalClears: 0, lastDaily: 0, seenEnemies: ['dohyeonling'],
+    settings: { sfx: 70, bgm: 50, defaultSpeed: 1, autoWave: false }, artifacts: { atkBuff: 0, hpBuff: 0, asBuff: 0, fragments: 0 }, mailbox: [],
+    dailyQuests: [
+      { id: 1, title: '10회 공격하기', target: 10, progress: 0, reward: { gold: 200, gem: 20 }, completed: false },
+      { id: 2, title: '3웨이브 클리어', target: 3, progress: 0, reward: { gold: 300, gem: 30 }, completed: false },
+      { id: 3, title: '영웅 배치하기', target: 5, progress: 0, reward: { gold: 150, gem: 15 }, completed: false }
+    ],
+    questLastReset: 0,
+    runeInventory: {},
+    runeEquipped: {}
+  };
+}
+
+let currentAccount = null;
+
+function setupPinInputs(prefix) {
+  for (let i = 0; i < 4; i++) {
+    const input = document.getElementById(prefix + i); if (!input) continue;
+    input.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ''); if (e.target.value && i < 3) document.getElementById(prefix + (i+1)).focus(); });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Backspace' && !e.target.value && i > 0) document.getElementById(prefix + (i-1)).focus(); });
+  }
+}
+setupPinInputs('login-pin-'); setupPinInputs('signup-pin-'); setupPinInputs('signup-pin2-');
+function getPin(prefix) { let pin = ''; for (let i = 0; i < 4; i++) pin += document.getElementById(prefix + i).value || ''; return pin; }
+function clearPin(prefix) { for (let i = 0; i < 4; i++) { const el = document.getElementById(prefix + i); if (el) el.value = ''; } }
+function switchLoginTab(tab) { document.getElementById('tab-login-btn').classList.toggle('active', tab === 'login'); document.getElementById('tab-signup-btn').classList.toggle('active', tab === 'signup'); document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none'; document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none'; }
+function renderAccountList() {
+  const accounts = loadAccounts(); const list = document.getElementById('account-list'); const keys = Object.keys(accounts);
+  if (keys.length === 0) { list.innerHTML = '<div style="color:#666; font-size:12px; text-align:center; padding:10px;">저장된 계정이 없습니다.</div>'; return; }
+  list.innerHTML = '<div style="color:#aaa; font-size:12px; margin-bottom:8px; text-align:left;">💾 저장된 계정 (클릭)</div>';
+  keys.forEach(nick => { const item = document.createElement('div'); item.className = 'account-item'; item.innerHTML = `<span>${nick}</span><span style="color:#ffd700; font-size:12px;">CH ${accounts[nick].clearedChapters.length} 클리어</span>`; item.onclick = () => { document.getElementById('login-nickname').value = nick; document.getElementById('login-pin-0').focus(); }; list.appendChild(item); });
+}
+renderAccountList();
+
+function checkAccountIntegrity(acc) {
+  if (!acc.seenEnemies) acc.seenEnemies = ['dohyeonling']; 
+  if (!acc.settings) acc.settings = { sfx: 70, bgm: 50, defaultSpeed: 1, autoWave: false };
+  if (acc.scrap === undefined) acc.scrap = 20; 
+  if (!acc.bossItems) acc.bossItems = { boss1:0, boss2:0, boss3:0, boss4:0 };
+  if (!acc.deck) acc.deck = Object.keys(acc.ownedHeroes).slice(0, 6);
+  if (!acc.artifacts) acc.artifacts = { atkBuff: 0, hpBuff: 0, asBuff: 0, fragments: 0 };
+  if (!acc.mailbox) acc.mailbox = [];
+  if (!acc.dailyQuests) acc.dailyQuests = [
+    { id: 1, title: '10회 공격하기', target: 10, progress: 0, reward: { gold: 200, gem: 20 }, completed: false },
+    { id: 2, title: '3웨이브 클리어', target: 3, progress: 0, reward: { gold: 300, gem: 30 }, completed: false },
+    { id: 3, title: '영웅 배치하기', target: 5, progress: 0, reward: { gold: 150, gem: 15 }, completed: false }
+  ];
+  if (!acc.questLastReset) acc.questLastReset = 0;
+  if (!acc.runeInventory) acc.runeInventory = {};
+  if (!acc.runeEquipped) acc.runeEquipped = {};
+}
+
+function doSignup() { const nick = document.getElementById('signup-nickname').value.trim(); const pin = getPin('signup-pin-'); const pin2 = getPin('signup-pin2-'); if (nick.length < 2 || nick.length > 12) return alert('닉네임은 2-12자여야 합니다.'); if (pin.length !== 4) return alert('비밀번호 4자리를 모두 입력해주세요.'); if (pin !== pin2) return alert('비밀번호가 일치하지 않습니다.'); const accounts = loadAccounts(); if (accounts[nick]) return alert('이미 사용 중인 닉네임입니다.'); accounts[nick] = createNewAccount(nick, pin); saveAccounts(accounts); currentAccount = accounts[nick]; saveSession(nick); enterMainMenu(); }
+function doLogin() { const nick = document.getElementById('login-nickname').value.trim(); const pin = getPin('login-pin-'); if (!nick) return alert('닉네임을 입력하세요.'); if (pin.length !== 4) return alert('비밀번호 4자리를 입력하세요.'); const accounts = loadAccounts(); if (!accounts[nick] || accounts[nick].pin !== pin) { clearPin('login-pin-'); return alert('정보가 일치하지 않습니다.'); } currentAccount = accounts[nick]; checkAccountIntegrity(currentAccount); saveSession(nick); enterMainMenu(); }
+function doLogout() { if (!confirm('로그아웃 하시겠습니까?')) return; saveCurrentAccount(); currentAccount = null; clearSession(); showScreen('screen-login'); clearPin('login-pin-'); renderAccountList(); }
+function deleteAccount() { if (!confirm('정말 계정을 삭제하시겠습니까?')) return; const accounts = loadAccounts(); delete accounts[currentAccount.nickname]; saveAccounts(accounts); currentAccount = null; clearSession(); showScreen('screen-login'); closeModal('settingsModal'); renderAccountList(); }
+function saveCurrentAccount() { if (!currentAccount) return; const accounts = loadAccounts(); accounts[currentAccount.nickname] = currentAccount; saveAccounts(accounts); }
+window.addEventListener('load', () => { const session = loadSession(); if (session) { const accounts = loadAccounts(); if (accounts[session]) { currentAccount = accounts[session]; checkAccountIntegrity(currentAccount); enterMainMenu(); } } });
+
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); setTimeout(() => document.getElementById(id).classList.add('active'), 50); }
+function enterMainMenu() { showScreen('screen-mainmenu'); updateProfileBar(); updateMailBadge(); }
+function updateProfileBar() { if (!currentAccount) return; document.getElementById('profile-name').textContent = currentAccount.nickname; document.getElementById('profile-meta').textContent = `클리어 ${currentAccount.clearedChapters.length}개 · 영웅 ${Object.keys(currentAccount.ownedHeroes).length}/${Object.keys(HEROES).length}`; document.getElementById('menu-gold').textContent = Math.floor(currentAccount.gold); document.getElementById('menu-gem').textContent = currentAccount.gem; document.getElementById('menu-scrap').textContent = currentAccount.scrap; }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function showToast(msg, duration = 2500) { const toast = document.getElementById('toast'); toast.innerHTML = msg; toast.style.display = 'block'; toast.style.animation = 'none'; toast.offsetHeight; toast.style.animation = null; clearTimeout(toast._t); toast._t = setTimeout(()=>{ toast.style.display='none'; }, duration); }
+
+/* 메일 및 패치노트 시스템 */
+function updateMailBadge() {
+  if (!currentAccount) return;
+  const unread = currentAccount.mailbox.filter(m => !m.claimed).length;
+  const badge = document.getElementById('mail-badge');
+  if (unread > 0) { badge.style.display = 'block'; badge.textContent = unread; } else { badge.style.display = 'none'; }
+}
+function openMailModal() {
+  document.getElementById('mailModal').classList.add('active');
+  renderMailList();
+}
+function renderMailList() {
+  const list = document.getElementById('mailList');
+  if (!currentAccount.mailbox || currentAccount.mailbox.length === 0) {
+    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">수신된 우편이 없습니다.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  // 최신 우편이 위로 오도록 정렬
+  const sortedMails = [...currentAccount.mailbox].sort((a,b) => b.date - a.date);
+  sortedMails.forEach(mail => {
+    let rHtml = '';
+    const r = mail.rewards;
+    if(r) {
+      if(r.gold) rHtml += `⬢${r.gold} `;
+      if(r.gem) rHtml += `◆${r.gem} `;
+      if(r.scrap) rHtml += `⚙${r.scrap} `;
+      if(r.frag) rHtml += `🏺${r.frag}조각 `;
+      if(r.boss1) rHtml += `고블린뿔:${r.boss1} `;
+      if(r.boss2) rHtml += `오크도끼:${r.boss2} `;
+      if(r.boss3) rHtml += `사신망토:${r.boss3} `;
+      if(r.boss4) rHtml += `마왕핵:${r.boss4} `;
+      if(r.unlockAllHeroes) rHtml += `🎁모든영웅해금권 `;
+    }
+    const html = `
+      <div class="mail-item" style="opacity: ${mail.claimed ? '0.5' : '1'};">
+        <div class="mail-header">
+          <div class="mail-title-text">${mail.title}</div>
+          <div class="mail-date">${new Date(mail.date).toLocaleDateString()}</div>
+        </div>
+        <div class="mail-content">${mail.content.replace(/\n/g, '<br>')}</div>
+        ${rHtml ? `<div class="mail-rewards">보상: ${rHtml}</div>` : ''}
+        ${!mail.claimed ? `<button class="btn btn-primary" onclick="claimMail(${mail.id})">보상 수령</button>` : `<button class="btn" disabled>수령 완료</button>`}
+      </div>
+    `;
+    list.innerHTML += html;
+  });
+}
+function claimMail(mailId) {
+  const mail = currentAccount.mailbox.find(m => m.id === mailId);
+  if(!mail || mail.claimed) return;
+  applyMailRewards(mail.rewards);
+  mail.claimed = true;
+  saveCurrentAccount(); updateProfileBar(); updateMailBadge(); renderMailList();
+  showToast('우편 보상을 수령했습니다!');
+}
+function claimAllMails() {
+  let claimedAny = false;
+  currentAccount.mailbox.forEach(mail => {
+    if(!mail.claimed) {
+      applyMailRewards(mail.rewards);
+      mail.claimed = true;
+      claimedAny = true;
+    }
+  });
+  if(claimedAny) {
+    saveCurrentAccount(); updateProfileBar(); updateMailBadge(); renderMailList();
+    showToast('모든 우편 보상을 수령했습니다!');
+  } else {
+    showToast('수령할 보상이 없습니다.');
+  }
+}
+function applyMailRewards(r) {
+  if(!r) return;
+  if(r.gold) currentAccount.gold += r.gold;
+  if(r.gem) currentAccount.gem += r.gem;
+  if(r.scrap) currentAccount.scrap += r.scrap;
+  if(r.frag) currentAccount.artifacts.fragments += r.frag;
+  if(r.boss1) currentAccount.bossItems.boss1 += r.boss1;
+  if(r.boss2) currentAccount.bossItems.boss2 += r.boss2;
+  if(r.boss3) currentAccount.bossItems.boss3 += r.boss3;
+  if(r.boss4) currentAccount.bossItems.boss4 += r.boss4;
+  if(r.unlockAllHeroes) Object.values(HEROES).forEach(h => currentAccount.ownedHeroes[h.id] = true);
+}
+
+function openPatchNotesModal() {
+  const global = loadGlobalData();
+  document.getElementById('patchNotesContent').textContent = global.patchNotes;
+  document.getElementById('patchNotesModal').classList.add('active');
+}
+
+/* 어드민 패널 시스템 */
+function openAdminModal() {
+  if (currentAccount.nickname !== '정우석') { showToast('❌ 접근 권한이 없습니다.'); return; }
+  document.getElementById('settingsModal').classList.remove('active');
+  
+  // 패치노트 기존 내용 불러오기
+  const global = loadGlobalData();
+  document.getElementById('admin-patch-text').value = global.patchNotes;
+  
+  document.getElementById('adminModal').classList.add('active');
+}
+
+function adminSendReward() {
+  const target = document.getElementById('admin-target').value.trim() || 'ALL';
+  const title = document.getElementById('admin-mail-title').value.trim() || '운영자 특별 보상';
+  const content = document.getElementById('admin-mail-content').value.trim() || '운영자가 보상을 지급했습니다.';
+  
+  const rewards = {
+    gold: parseInt(document.getElementById('admin-gold').value) || 0,
+    gem: parseInt(document.getElementById('admin-gem').value) || 0,
+    scrap: parseInt(document.getElementById('admin-scrap').value) || 0,
+    frag: parseInt(document.getElementById('admin-frag').value) || 0,
+    boss1: parseInt(document.getElementById('admin-boss1').value) || 0,
+    boss2: parseInt(document.getElementById('admin-boss2').value) || 0,
+    boss3: parseInt(document.getElementById('admin-boss3').value) || 0,
+    boss4: parseInt(document.getElementById('admin-boss4').value) || 0,
+    unlockAllHeroes: document.getElementById('admin-unlock-heroes').checked
+  };
+
+  const mailObj = { id: Date.now() + Math.random(), title, content, rewards, claimed: false, date: Date.now() };
+  const accounts = loadAccounts();
+
+  if (target === 'ALL') {
+    for (let nick in accounts) {
+      if(!accounts[nick].mailbox) accounts[nick].mailbox = [];
+      accounts[nick].mailbox.push({...mailObj});
+    }
+    showToast('전체 유저에게 우편 발송 완료!');
+  } else {
+    if(!accounts[target]) return alert('존재하지 않는 닉네임입니다.');
+    if(!accounts[target].mailbox) accounts[target].mailbox = [];
+    accounts[target].mailbox.push(mailObj);
+    showToast(`'${target}' 님에게 우편 발송 완료!`);
+  }
+  
+  saveAccounts(accounts);
+  // 자신이 포함된 경우 즉시 갱신
+  if (target === 'ALL' || target === currentAccount.nickname) {
+    currentAccount = accounts[currentAccount.nickname];
+    updateMailBadge();
+  }
+}
+
+function adminUpdatePatchNote() {
+  const text = document.getElementById('admin-patch-text').value;
+  const global = loadGlobalData();
+  global.patchNotes = text;
+  saveGlobalData(global);
+  showToast('패치노트가 성공적으로 저장/퍼블리싱 되었습니다.');
+}
+
+
+function openDeckModal() {
+  if (!currentAccount.deck) currentAccount.deck = []; const slots = document.getElementById('deck-slots'); slots.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const hId = currentAccount.deck[i]; const slot = document.createElement('div'); slot.className = 'deck-slot';
+    if (hId && HEROES[hId]) { const h = HEROES[hId]; slot.innerHTML = `<div class="unit-rarity rarity-${h.rarity}" style="position:absolute; top:-5px; right:-5px;">${h.rarity}</div><div class="unit-portrait" style="border-color:${h.color}; margin-bottom:4px;">${h.emoji}</div><div style="color:#fff; font-size:12px; font-weight:bold;">${h.name}</div>`; slot.onclick = () => { currentAccount.deck.splice(i, 1); saveCurrentAccount(); openDeckModal(); }; } else slot.innerHTML = `<div style="color:#666; font-size:12px;">빈 슬롯</div>`; slots.appendChild(slot);
+  }
+  const pool = document.getElementById('deck-pool'); pool.innerHTML = '';
+  Object.values(HEROES).forEach(h => {
+    if (!currentAccount.ownedHeroes[h.id]) return; const inDeck = currentAccount.deck.includes(h.id); const card = document.createElement('div'); card.className = 'unit-card' + (inDeck ? ' selected' : '');
+    card.innerHTML = `<div class="unit-rarity rarity-${h.rarity}">${h.rarity}</div><div class="unit-portrait" style="border-color:${h.color}; background:radial-gradient(circle, ${h.color}44, transparent);">${h.emoji}</div><div class="unit-name">${h.name}</div><div class="unit-cost">⬢ ${h.cost}</div>${inDeck ? '<div style="position:absolute; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; border-radius:8px; pointer-events:none;">편성됨</div>' : ''}`;
+    card.onclick = () => { if (inDeck) currentAccount.deck = currentAccount.deck.filter(id => id !== h.id); else { if (currentAccount.deck.length >= 6) { showToast('최대 6명 편성가능'); return; } currentAccount.deck.push(h.id); } saveCurrentAccount(); openDeckModal(); }; pool.appendChild(card);
+  }); document.getElementById('deckModal').classList.add('active');
+}
+
+function openChapterModal() {
+  const grid = document.getElementById('chapterGrid'); grid.innerHTML = ''; let lastStage = 0;
+  CHAPTERS.forEach((c, idx) => {
+    if (c.stage !== lastStage) { const h = document.createElement('div'); h.className = 'chapter-stage-header'; h.textContent = `📜 ${c.stage}장`; grid.appendChild(h); lastStage = c.stage; }
+    const btn = document.createElement('div'); let cls = 'chapter-btn'; let locked = false; if (idx > 0 && !currentAccount.clearedChapters.includes(CHAPTERS[idx-1].id)) { cls += ' locked'; locked = true; }
+    if (currentAccount.clearedChapters.includes(c.id)) cls += ' cleared'; if (c.isBoss) cls += ' boss'; btn.className = cls;
+    btn.innerHTML = `<div class="chapter-num">${c.id}${c.isBoss?' 👑':''}</div><div class="chapter-name">${c.isBoss ? '결전' : '진격'}</div>${currentAccount.clearedChapters.includes(c.id) ? '<div style="font-size:12px;color:#4caf50; font-weight:bold; margin-top:4px;">✓ CLEAR</div>' : ''}${locked ? '<div style="font-size:18px;color:#666; margin-top:4px;">🔒</div>' : ''}`;
+    if (!locked) btn.onclick = () => { closeModal('chapterModal'); startChapter(idx); }; grid.appendChild(btn);
+  });
+  const chalBtn = document.createElement('div'); chalBtn.className = 'chapter-btn boss'; chalBtn.style.gridColumn = '1 / -1'; chalBtn.style.marginTop = '10px'; chalBtn.innerHTML = `<div class="chapter-num" style="color:#ff6b6b; font-size:24px;">🔥 챌린지 모드</div><div class="chapter-name" style="font-size:16px;">김도현을 잡아라!</div>`; chalBtn.onclick = () => { closeModal('chapterModal'); startChallengeMode(); }; grid.appendChild(chalBtn);
+  const endlessBtn = document.createElement('div'); endlessBtn.className = 'chapter-btn cleared'; endlessBtn.style.gridColumn = '1 / -1'; endlessBtn.style.marginTop = '5px'; endlessBtn.style.borderColor = '#4db6ac'; endlessBtn.innerHTML = `<div class="chapter-num" style="color:#4db6ac; font-size:24px;">🏺 유물 던전</div><div class="chapter-name" style="font-size:16px;">끝없는 군세 (유물 조각 파밍)</div>`; endlessBtn.onclick = () => { closeModal('chapterModal'); startEndlessMode(); }; grid.appendChild(endlessBtn);
+  document.getElementById('chapterModal').classList.add('active');
+}
+
+// 유물 모달 로직
+function openArtifactModal() {
+  updateArtifactUI(); document.getElementById('artifactModal').classList.add('active');
+}
+function updateArtifactUI() {
+  const a = currentAccount.artifacts; document.getElementById('art-frag-display').textContent = a.fragments;
+  document.getElementById('art-atk-val').textContent = `+${a.atkBuff}%`; document.getElementById('art-hp-val').textContent = `+${a.hpBuff}%`; document.getElementById('art-as-val').textContent = `+${a.asBuff}%`;
+  document.getElementById('art-atk-cost').textContent = 100 + a.atkBuff * 50; document.getElementById('art-hp-cost').textContent = 100 + a.hpBuff * 50; document.getElementById('art-as-cost').textContent = 150 + a.asBuff * 80;
+}
+function upgradeArtifact(type) {
+  const a = currentAccount.artifacts; let cost = 0; 
+  if(type==='atk') cost = 100 + a.atkBuff*50; else if(type==='hp') cost = 100 + a.hpBuff*50; else if(type==='as') cost = 150 + a.asBuff*80;
+  if(a.fragments < cost) { showToast('유물 조각이 부족합니다!'); return; }
+  a.fragments -= cost; if(type==='atk') a.atkBuff += 5; else if(type==='hp') a.hpBuff += 5; else if(type==='as') a.asBuff += 2;
+  saveCurrentAccount(); updateArtifactUI(); showToast('✨ 유물이 강화되었습니다! ✨');
+}
+
+let isGachaRolling = false;
+function doGacha(count) {
+  if(isGachaRolling) return; const cost = count === 1 ? 100 : 900; if (currentAccount.gem < cost) { showToast('잼이 부족합니다!'); return; }
+  currentAccount.gem -= cost; updateProfileBar(); isGachaRolling = true;
+  const pool = Object.values(HEROES).filter(h => h.isGacha); const results = [];
+  for (let i = 0; i < count; i++) {
+    const r = Math.random(); let s;
+    if (r < 0.001) s = pool.filter(h => h.rarity === 'Celestial'); // 0.1%
+    else if (r < 0.005) s = pool.filter(h => h.rarity === 'Mystic'); // 0.4%
+    else if (r < 0.02) s = pool.filter(h => h.rarity === 'SSR'); // 1.5%
+    else if (r < 0.10) s = pool.filter(h => h.rarity === 'SR'); // 8.0%
+    else if (r < 0.40) s = pool.filter(h => h.rarity === 'R' || h.rarity === 'Rare'); // 30.0%
+    else s = pool.filter(h => h.rarity === 'Uncommon' || h.rarity === 'Common'); // 60.0%
+    if(!s.length) s = pool; results.push(s[Math.floor(Math.random() * s.length)].id);
+  }
+  const highTier = results.some(id => ['SSR', 'Mystic', 'Celestial', 'Secret', 'Our_World'].includes(HEROES[id].rarity));
+  if(highTier) { document.getElementById('gachaCutscene').classList.add('active'); setTimeout(() => { document.getElementById('gachaCutscene').classList.remove('active'); showGachaResults(results, count); }, 2500); } else { showGachaResults(results, count); }
+}
+
+function showGachaResults(results, count) {
+  let scrapGain = 0; const html = `<div style="margin-bottom:20px; font-size:28px; font-weight:900; color:#ffd700; text-shadow: 0 0 15px rgba(255,215,0,0.8); animation: titleGlow 2s infinite;">✨ 소환 결과 ✨</div><div style="display:flex; flex-wrap:wrap; justify-content:center; perspective: 1000px;">
+    ${results.map((id, i) => { const h = HEROES[id]; const isNew = !currentAccount.ownedHeroes[id]; if (!isNew) scrapGain += 5; currentAccount.ownedHeroes[id] = true; let c = '#fff'; if(h.rarity === 'Celestial') c = '#fff'; else if(h.rarity === 'Mystic') c = '#00bcd4'; else if(h.rarity === 'SSR') c = '#ffd700'; else if(h.rarity === 'SR') c = '#b388ff'; else if(h.rarity === 'R' || h.rarity === 'Rare') c = '#4fc3f7';
+      return `<div class="gacha-pull rarity-effect-${h.rarity}" style="border-color:${h.color}; animation: gachaCardReveal 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards; animation-delay: ${i*0.1}s; box-shadow: 0 0 20px ${c}66;"><div class="unit-rarity rarity-${h.rarity}" style="font-size:12px; padding:3px 8px;">${h.rarity}</div><div class="big-icon" style="text-shadow: 0 0 15px ${c};">${h.emoji}</div><div style="color:${h.color}; font-weight:900; font-size:18px; margin-top:8px;">${h.name}</div><div style="font-size:12px; color:#ccc; margin-top:4px;">${h.title}</div>${isNew ? '<div style="color:#ffd700; font-size:14px; font-weight:bold; margin-top:10px; animation: blink 1.5s infinite;">★ NEW ★</div>' : '<div style="font-size:12px; color:#81c784; margin-top:10px; font-weight:bold;">+5 파편</div>'}</div>`;
+    }).join('')}</div>${scrapGain > 0 ? `<div style="color:#81c784; font-weight:bold; font-size:16px; margin-top:20px;">⚙ 중복 영웅 파편 +${scrapGain} 획득</div>` : ''}<div style="margin-top:30px;"><button class="btn btn-gacha" onclick="doGacha(1)" style="margin:0 10px; padding:12px 24px;">단일 소환 (◆ 100)</button><button class="btn btn-gacha" onclick="doGacha(10)" style="margin:0 10px; padding:12px 24px;">10연 소환 (◆ 900)</button></div>`;
+  document.getElementById('gachaResult').innerHTML = html; currentAccount.scrap += scrapGain; updateProfileBar(); saveCurrentAccount(); setTimeout(() => { isGachaRolling = false; }, 1000);
+}
+
+function openGachaModal() { document.getElementById('gachaResult').innerHTML = `<div style="display:flex; justify-content:space-around; padding:30px 0 10px 0;"><div style="text-align:center;"><div style="font-size:70px;">🎁</div><div style="margin:16px 0; color:#e1bee7; font-weight:bold; font-size:16px;">단일 소환</div><div style="color:#ffd700; font-weight:900; font-size:20px;">◆ 100</div></div><div style="text-align:center;"><div style="font-size:70px;">🎀</div><div style="margin:16px 0; color:#e1bee7; font-weight:bold; font-size:16px;">10연 소환</div><div style="color:#ffd700; font-weight:900; font-size:20px;">◆ 900</div></div></div><div style="font-size:12px; color:#bbb; background:rgba(0,0,0,0.5); padding:10px; border-radius:6px; margin-bottom:20px; text-align:center; border:1px solid rgba(212,175,55,0.3);">📊 <b>확률표</b> : Celestial 0.1% | Mystic 0.4% | SSR 1.5% | SR 8.0% | Rare 30.0% | Normal 60.0%</div><button class="btn btn-gacha" onclick="doGacha(1)" style="margin:0 10px; padding:14px 24px;">단일 소환</button><button class="btn btn-gacha" onclick="doGacha(10)" style="margin:0 10px; padding:14px 24px;">10연 소환</button>`; document.getElementById('gachaModal').classList.add('active'); }
+
+let codexTab = 'hero';
+function openCodexModal() { document.getElementById('codexModal').classList.add('active'); renderCodex(); }
+function switchCodexTab(tab) { codexTab = tab; document.querySelectorAll('.codex-tab').forEach((el, idx) => el.classList.toggle('active', (idx === 0 && tab === 'hero') || (idx === 1 && tab === 'enemy'))); renderCodex(); }
+function getSkillDesc(t) { const h = HEROES[t.heroId]; return (t.level >= 3 && h.skillDescUp3) ? h.skillDescUp3 : h.skillDesc; }
+function renderCodex() {
+  const grid = document.getElementById('codexGrid'); grid.innerHTML = '';
+  if (codexTab === 'hero') {
+    const rarities = ['Common', 'Uncommon', 'Rare', 'SR', 'SSR', 'Mystic', 'Celestial', 'Secret', 'Our_World', '8★', '12★'];
+    rarities.forEach(rarity => {
+      const heroes = Object.values(HEROES).filter(h => h.rarity === rarity);
+      if (heroes.length === 0) return;
+      const rarityTitle = document.createElement('div');
+      rarityTitle.style.cssText = 'grid-column: 1 / -1; padding: 12px 0; color: #ffd700; font-weight: bold; border-bottom: 1px solid rgba(212,175,55,0.3); margin-top: 12px;';
+      let rarityColor = '#ccc';
+      if (rarity === 'SSR') rarityColor = '#ffd700';
+      else if (rarity === 'SR') rarityColor = '#b388ff';
+      else if (rarity === 'Rare') rarityColor = '#4fc3f7';
+      else if (rarity === 'Mystic') rarityColor = '#00bcd4';
+      else if (rarity === 'Celestial') rarityColor = '#fff';
+      else if (rarity === 'Our_World') rarityColor = '#ff69b4';
+      else if (rarity === '8★') rarityColor = '#4dd0e1';
+      else if (rarity === '12★') rarityColor = '#ffe082';
+      rarityTitle.innerHTML = `<span style="color: ${rarityColor};">★ ${rarity} (${heroes.length})</span>`;
+      grid.appendChild(rarityTitle);
+      heroes.forEach(h => {
+        const owned = currentAccount.ownedHeroes[h.id];
+        const entry = document.createElement('div');
+        entry.className = 'codex-entry' + (!owned ? ' locked' : '');
+        entry.innerHTML = `<div class="codex-icon" style="border-color:${h.color}; color:${h.color};">${owned ? h.emoji : '❓'}</div><div class="codex-info"><div class="codex-name">${owned ? h.name : '???'} <span class="unit-rarity rarity-${h.rarity}" style="margin-left:8px; font-size:11px;">${h.rarity}</span></div><div class="codex-title-text">${owned ? h.title : '미발견 영웅'}</div>${owned ? `<div class="codex-stats"><b>비용</b> ⬢${h.cost} · <b>체력</b> ${h.hp} · <b>공력</b> ${h.damage}<br><b>스킬</b> <span style="color:#e1bee7">${h.skillDesc}</span></div>` : ''}</div>`;
+        grid.appendChild(entry);
+      });
+    });
+  }
+  else { Object.entries(ENEMIES).forEach(([key, e]) => { const seen = currentAccount.seenEnemies.includes(key); const entry = document.createElement('div'); entry.className = 'codex-entry' + (!seen ? ' locked' : ''); entry.innerHTML = `<div class="codex-icon" style="border-color:${e.color}; color:${e.color};">${seen ? e.emoji : '❓'}</div><div class="codex-info"><div class="codex-name" style="color:${e.boss ? '#ff6b6b' : '#ffd700'}">${seen ? e.name : '???'}</div><div class="codex-title-text">${e.boss ? '◆ BOSS 마물' : '일반 마물'}</div>${seen ? `<div class="codex-stats"><b>체력</b> ${e.hp} · <b>속도</b> ${e.speed.toFixed(1)}</div>` : ''}</div>`; grid.appendChild(entry); }); }
+}
+
+function openCraftModal() { document.getElementById('inv-boss1').textContent = currentAccount.bossItems.boss1; document.getElementById('inv-boss2').textContent = currentAccount.bossItems.boss2; document.getElementById('inv-boss3').textContent = currentAccount.bossItems.boss3; document.getElementById('inv-boss4').textContent = currentAccount.bossItems.boss4; document.getElementById('craftModal').classList.add('active'); renderCraftList(); }
+function renderCraftList() {
+  const list = document.getElementById('craftList'); list.innerHTML = '';
+  CRAFT_RECIPES.forEach(cr => { const h = HEROES[cr.heroId]; const owned = currentAccount.ownedHeroes[h.id]; let reqHtml = '', canCraft = true; for (const [k, v] of Object.entries(cr.req)) { let myAmt = 0, name = ''; if (k === 'gold') { myAmt = currentAccount.gold; name = '⬢골드'; } else if (k === 'gem') { myAmt = currentAccount.gem; name = '◆잼'; } else { myAmt = currentAccount.bossItems[k] || 0; name = BOSS_ITEMS[k]; } const ok = myAmt >= v; if (!ok) canCraft = false; reqHtml += `<span class="req-item ${ok ? 'ok' : 'fail'}">${name} ${v} (보유:${myAmt})</span>`; }
+    const div = document.createElement('div'); div.className = 'craft-recipe' + (owned ? ' crafted' : ''); div.innerHTML = `<div class="craft-icon" style="border-color:${h.color}; color:${h.color};">${h.emoji}</div><div class="craft-info"><div class="craft-name" style="color:${h.color}">${h.name} <span class="unit-rarity rarity-${h.rarity}" style="margin-left:6px; font-size:11px;">${h.rarity}</span></div><div class="craft-title-text">${h.title}</div><div style="margin-top:8px;">${reqHtml}</div></div><button class="btn btn-success" style="padding:12px 24px; font-size:15px;" ${owned || !canCraft ? 'disabled' : ''} onclick="craftHero('${h.id}')">${owned ? '✓ 보유중' : '⚒️ 제작'}</button>`; list.appendChild(div);
+  });
+}
+function craftHero(id) { const recipe = CRAFT_RECIPES.find(r => r.heroId === id); if (!recipe) return; for (const [k, v] of Object.entries(recipe.req)) { if (k === 'gold') currentAccount.gold -= v; else if (k === 'gem') currentAccount.gem -= v; else currentAccount.bossItems[k] -= v; } currentAccount.ownedHeroes[id] = true; saveCurrentAccount(); updateProfileBar(); showToast(`✨ [ ${HEROES[id].name} ] 비밀 영웅 제작 완료! ✨`); openCraftModal(); }
+
+function openSettingsModal() { const s = currentAccount.settings; document.getElementById('sfx-volume').value = s.sfx; document.getElementById('sfx-volume-val').textContent = s.sfx; document.getElementById('bgm-volume').value = s.bgm; document.getElementById('bgm-volume-val').textContent = s.bgm; document.getElementById('default-speed').value = s.defaultSpeed; document.getElementById('auto-wave').checked = s.autoWave; document.getElementById('settingsModal').classList.add('active'); }
+function saveSettings() { if (!currentAccount) return; currentAccount.settings = { sfx: parseInt(document.getElementById('sfx-volume').value), bgm: parseInt(document.getElementById('bgm-volume').value), defaultSpeed: parseInt(document.getElementById('default-speed').value), autoWave: document.getElementById('auto-wave').checked }; saveCurrentAccount(); showToast('설정이 성공적으로 저장되었습니다.'); }
+function claimDailyReward() { const now = Date.now(); const last = currentAccount.lastDaily || 0; if (now - last < 1000 * 60 * 60 * 20) { showToast(`다음 보상까지 대기필요`); return; } currentAccount.lastDaily = now; currentAccount.gold += 500; currentAccount.gem += 50; currentAccount.scrap += 10; saveCurrentAccount(); updateProfileBar(); showToast('🎀 출석 보상 획득: ⬢500 ◆50 ⚙10', 3000); }
+
+// ===== 일일 퀘스트 시스템 =====
+function openQuestModal() {
+  const now = Date.now();
+  const lastReset = currentAccount.questLastReset || 0;
+  if (now - lastReset > 24 * 60 * 60 * 1000) {
+    currentAccount.dailyQuests.forEach(q => { q.progress = 0; q.completed = false; });
+    currentAccount.questLastReset = now;
+    saveCurrentAccount();
+  }
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay active';
+  modal.id = 'questModal';
+  modal.style.cssText = 'position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:200;';
+  modal.innerHTML = `<div class=\"modal\" style=\"min-width: 700px;\"><div class=\"modal-title\">📋 일일 퀘스트</div><div class=\"modal-subtitle\">매일 초기화되는 특별한 퀘스트</div><div id=\"questList\" style=\"max-height: 400px; overflow-y: auto;\"></div><button class=\"btn\" style=\"margin-top:20px; width:100%; padding:14px; font-size:16px;\" onclick=\"document.getElementById('questModal').remove()\">닫기</button></div>`;
+  document.getElementById('game-container').appendChild(modal);
+  renderQuestList();
+}
+
+function renderQuestList() {
+  const list = document.getElementById('questList');
+  if (!list) return;
+  list.innerHTML = '';
+  currentAccount.dailyQuests.forEach(q => {
+    const progress = Math.min(100, (q.progress / q.target) * 100);
+    list.innerHTML += `<div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.4); border-radius: 8px; padding: 16px; margin-bottom: 12px;"><div style="color: ${q.completed ? '#4caf50' : '#ffd700'}; font-weight: bold; margin-bottom: 8px;">${q.completed ? '✓' : '◆'} ${q.title}</div><div style="background: rgba(0,0,0,0.5); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 8px;"><div style="background: #4fc3f7; height: 100%; width: ${progress}%; transition: width 0.2s;"></div></div><div style="display:flex; justify-content:space-between; align-items:center;"><div style="color: #aaa; font-size: 11px;">${q.progress} / ${q.target}</div><div><span style="color: #ffd700; font-weight: bold; margin-right: 12px;">⬢ ${q.reward.gold}</span><span style="color: #b388ff; font-weight: bold; margin-right: 12px;">◆ ${q.reward.gem}</span>${q.completed ? '<button class=\"btn btn-success\" onclick=\"claimQuestReward(' + q.id + ')\" style=\"padding:6px 12px; font-size:12px;\">수령</button>' : ''}</div></div></div>`;
+  });
+}
+
+function claimQuestReward(questId) {
+  const quest = currentAccount.dailyQuests.find(q => q.id === questId);
+  if (!quest || !quest.completed) return;
+  currentAccount.gold += quest.reward.gold;
+  currentAccount.gem += quest.reward.gem;
+  quest.completed = false;
+  quest.progress = 0;
+  saveCurrentAccount();
+  updateProfileBar();
+  renderQuestList();
+  showToast(`⭐ 퀘스트 보상 수령: ⬢${quest.reward.gold} ◆${quest.reward.gem}`);
+}
+
+function updateQuestProgress(type, amount = 1) {
+  if (!currentAccount.dailyQuests) return;
+  currentAccount.dailyQuests.forEach(q => {
+    if (type === 'attack' && q.id === 1) { q.progress = Math.min(q.target, q.progress + amount); if (q.progress >= q.target && !q.completed) { q.completed = true; showToast('✓ 퀘스트 완료: ' + q.title); } }
+    else if (type === 'wave' && q.id === 2) { q.progress = Math.min(q.target, q.progress + amount); if (q.progress >= q.target && !q.completed) { q.completed = true; showToast('✓ 퀘스트 완료: ' + q.title); } }
+    else if (type === 'placement' && q.id === 3) { q.progress = Math.min(q.target, q.progress + amount); if (q.progress >= q.target && !q.completed) { q.completed = true; showToast('✓ 퀘스트 완료: ' + q.title); } }
+  });
+}
+
+// ===== 룬 뽑기 시스템 =====
+let isRuneGachaRolling = false;
+function doRuneGacha(count) {
+  if (isRuneGachaRolling) return;
+  const cost = count === 1 ? 50 : 450;
+  if (currentAccount.gem < cost) { showToast('잼이 부족합니다!'); return; }
+  currentAccount.gem -= cost;
+  updateProfileBar();
+  isRuneGachaRolling = true;
+  const pool = Object.values(RUNES);
+  const results = [];
+  for (let i = 0; i < count; i++) {
+    const r = Math.random();
+    let s;
+    if (r < 0.05) s = pool.filter(ru => ru.rarity === 'SR');
+    else if (r < 0.2) s = pool.filter(ru => ru.rarity === 'Rare');
+    else if (r < 0.5) s = pool.filter(ru => ru.rarity === 'Uncommon');
+    else s = pool.filter(ru => ru.rarity === 'Common');
+    if (!s.length) s = pool;
+    results.push(s[Math.floor(Math.random() * s.length)].id);
+  }
+  showRuneGachaResults(results, count);
+}
+
+function showRuneGachaResults(results, count) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay active';
+  modal.id = 'runeGachaResultModal';
+  modal.style.cssText = 'position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:200;';
+  let html = `<div class=\"modal\" style=\"min-width: 700px;\"><div class=\"modal-title\">✨ 룬 뽑기 결과</div><div style=\"display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 20px 0;\">`;
+  results.forEach((runeId) => {
+    const rune = RUNES[runeId];
+    if (!currentAccount.runeInventory[runeId]) currentAccount.runeInventory[runeId] = 0;
+    currentAccount.runeInventory[runeId]++;
+    let rarityColor = '#ccc';
+    if (rune.rarity === 'SR') rarityColor = '#b388ff';
+    else if (rune.rarity === 'Rare') rarityColor = '#4fc3f7';
+    html += `<div style=\"background: linear-gradient(135deg, rgba(60,40,20,0.5), rgba(20,10,30,0.8)); border: 2px solid ${rune.color}; border-radius: 10px; padding: 16px; text-align: center; width: 100px;\"><div style=\"font-size: 32px; margin-bottom: 8px;\">${rune.emoji}</div><div style=\"color: ${rarityColor}; font-weight: bold; font-size: 12px;\">${rune.rarity}</div><div style=\"color: #fff; font-size: 11px; margin-top: 4px;\">${rune.name}</div></div>`;
+  });
+  html += `</div><div style=\"text-align: center; margin: 20px 0;\"><button class=\"btn btn-gacha\" onclick=\"doRuneGacha(1)\" style=\"margin: 0 10px;\">단일 뽑기</button><button class=\"btn btn-gacha\" onclick=\"doRuneGacha(10)\" style=\"margin: 0 10px;\">10연 뽑기</button></div><button class=\"btn\" style=\"width: 100%; padding: 14px;\" onclick=\"this.closest('.modal-overlay').remove()\">닫기</button></div>`;
+  modal.innerHTML = html;
+  document.getElementById('game-container').appendChild(modal);
+  saveCurrentAccount();
+  updateProfileBar();
+  setTimeout(() => { isRuneGachaRolling = false; }, 1000);
+}
+
+// ===== 협력 모드 (COOP) 시스템 =====
+let coopRoom = null;
+let coopPartner = null;
+let coopCode = '';
+
+function generateCoopCode() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+function createCoopRoom() {
+  coopCode = generateCoopCode();
+  coopRoom = { roomCode: coopCode, host: currentAccount.nickname, createdAt: Date.now(), players: [currentAccount.nickname], sharedUpgrades: { atkBuff: 0, hpBuff: 0, asBuff: 0 } };
+  localStorage.setItem('coopRoom_' + coopCode, JSON.stringify(coopRoom));
+  showToast(`🎮 협력 방 생성됨: [${coopCode}]`);
+}
+
+function joinCoopRoom(code) {
+  const roomData = localStorage.getItem('coopRoom_' + code);
+  if (!roomData) { showToast('❌ 방을 찾을 수 없습니다'); return; }
+  coopRoom = JSON.parse(roomData);
+  if (coopRoom.players.length >= 2) { showToast('❌ 방이 가득 찼습니다'); return; }
+  coopRoom.players.push(currentAccount.nickname);
+  coopRoom.partner = currentAccount.nickname;
+  localStorage.setItem('coopRoom_' + code, JSON.stringify(coopRoom));
+  coopCode = code;
+  showToast(`✅ 협력 방 입장: [${code}]`);
+}
+
+function openCoopModal() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay active';
+  modal.id = 'coopModal';
+  modal.style.cssText = 'position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:200;';
+  modal.innerHTML = `<div class="modal" style="min-width: 600px;"><div class="modal-title">🎮 협력 모드</div><div class="modal-subtitle">친구와 함께 플레이하세요</div><div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 8px; margin: 20px 0;"><div style="color: #ffd700; font-weight: bold; margin-bottom: 12px;">현재 상태</div><div style="color: #aaa; margin-bottom: 8px;">📍 방 코드: ${coopCode || '없음'}</div><div style="color: #aaa; margin-bottom: 8px;">👥 플레이어: ${coopRoom ? coopRoom.players.length + '/2' : '미참여'}</div><div style="color: #4caf50; margin-bottom: 0;">⚙️ 공유 업그레이드: ATK ${coopRoom?.sharedUpgrades?.atkBuff || 0}% / HP ${coopRoom?.sharedUpgrades?.hpBuff || 0}%</div></div><div style="display: flex; gap: 12px; margin-bottom: 20px;"><button class="btn btn-success" style="flex: 1;" onclick="createCoopRoom(); this.closest('.modal-overlay').remove(); setTimeout(openCoopModal, 500);">🏠 새 방 만들기</button><button class="btn btn-gacha" style="flex: 1;" onclick="const code = prompt('방 코드 입력:'); if(code) joinCoopRoom(code); this.closest('.modal-overlay').remove(); setTimeout(openCoopModal, 500);">🔗 방 입장</button></div><div style="color: #aaa; font-size: 12px; line-height: 1.6; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 6px; margin-bottom: 16px;"><b>📋 협력 모드 규칙:</b><br>• 양쪽 플레이어에게 동일한 몬스터 출현<br>• 업그레이드는 모두가 공유<br>• 영웅 판매는 불가능<br>• 한쪽이 게임 종료 시 모두 종료</div><button class="btn" style="width: 100%; padding: 14px;" onclick="this.closest('.modal-overlay').remove()">닫기</button></div>`;
+  document.getElementById('game-container').appendChild(modal);
+}
+
+// ===== 스킬 시스템 =====
+const SKILL_TYPES = {
+  // 데미지 스킬
+  singleStrike: { name: '단일 타격', effect: 'damage', target: 'single', multiplier: 1.5 },
+  areaBlast: { name: '광역 폭발', effect: 'damage', target: 'area', multiplier: 1.2 },
+  chainStrike: { name: '연쇄 공격', effect: 'damage', target: 'multiple', multiplier: 1.0, count: 3 },
+  
+  // 회복/버프 스킬
+  selfHeal: { name: '자기 회복', effect: 'heal', target: 'self', amount: 30 },
+  teamBuff: { name: '팀 강화', effect: 'buff', target: 'all', statBuff: { damage: 1.3, speed: 1.2 } },
+  shieldBuff: { name: '보호막', effect: 'shield', target: 'all', shield: 0.4 },
+  
+  // 디버프/제어 스킬
+  slowDebuff: { name: '감속', effect: 'debuff', target: 'area', slow: 0.5 },
+  stun: { name: '기절', effect: 'stun', target: 'single', duration: 200 },
+  execution: { name: '즉사', effect: 'execution', target: 'single', threshold: 0.3 },
+  
+  // 유틸리티
+  teleport: { name: '순간이동', effect: 'teleport', distance: 300 },
+  summon: { name: '소환', effect: 'summon', unitType: 'minion', count: 2 },
+  timeWarp: { name: '시간 왜곡', effect: 'timeWarp', speedMult: 2.0, duration: 300 },
+};
+
+function executeSkill(tower, skillType, targets) {
+  const skill = SKILL_TYPES[skillType];
+  if (!skill) return;
+  
+  switch(skill.effect) {
+    case 'damage':
+      targets.forEach(t => t.hp -= tower.damage * skill.multiplier);
+      break;
+    case 'heal':
+      tower.hp = Math.min(tower.maxHp, tower.hp + (tower.maxHp * skill.amount / 100));
+      break;
+    case 'buff':
+      gameState.towers.forEach(t => {
+        if (skill.target === 'all' || (skill.target === 'nearby' && distance(tower, t) < 200)) {
+          t.buffDamage = (t.buffDamage || 1) * skill.statBuff.damage;
+        }
+      });
+      break;
+    case 'stun':
+      targets.forEach(t => t.stunned = skill.duration);
+      break;
+  }
+}
+
+const COOP_STORAGE_KEY = 'coopData';
+function openRuneInventoryModal() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay active';
+  modal.id = 'runeInventoryModal';
+  modal.style.cssText = 'position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:200;';
+  modal.innerHTML = `<div class=\"modal\" style=\"min-width: 800px; max-height: 90vh;\"><div class=\"modal-title\">📿 룬 인벤토리</div><div class=\"modal-subtitle\">보유한 룬을 관리하세요</div><div id=\"runeInventoryList\" style=\"max-height: 400px; overflow-y: auto; background: rgba(0,0,0,0.5); padding: 16px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.3); margin-bottom: 16px;\"></div><div style=\"text-align: center; margin-bottom: 20px;\"><button class=\"btn btn-gacha\" onclick=\"doRuneGacha(1)\" style=\"margin: 0 10px;\">단일 뽑기 (◆50)</button><button class=\"btn btn-gacha\" onclick=\"doRuneGacha(10)\" style=\"margin: 0 10px;\">10연 뽑기 (◆450)</button></div><button class=\"btn\" style=\"width: 100%; padding: 14px;\" onclick=\"document.getElementById('runeInventoryModal').remove()\">닫기</button></div>`;
+  document.getElementById('game-container').appendChild(modal);
+  renderRuneInventory();
+}
+
+function renderRuneInventory() {
+  const list = document.getElementById('runeInventoryList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!Object.keys(currentAccount.runeInventory).some(k => currentAccount.runeInventory[k] > 0)) {
+    list.innerHTML = '<div style=\"color: #aaa; text-align: center; padding: 40px;\">보유한 룬이 없습니다. 룬 뽑기로 획득해보세요!</div>';
+    return;
+  }
+  const runesByTier = {};
+  for (const [runeId, count] of Object.entries(currentAccount.runeInventory || {})) {
+    if (count > 0) {
+      const rune = RUNES[runeId];
+      if (!runesByTier[rune.tier]) runesByTier[rune.tier] = [];
+      runesByTier[rune.tier].push({ runeId, rune, count });
+    }
+  }
+  for (let tier = 4; tier >= 1; tier--) {
+    if (runesByTier[tier]) {
+      list.innerHTML += `<div style=\"color: ${tier === 4 ? '#b388ff' : tier === 3 ? '#4fc3f7' : '#ffd700'}; font-weight: bold; margin-top: 12px; margin-bottom: 8px;\">⭐ Tier ${tier}</div>`;
+      runesByTier[tier].forEach(item => {
+        list.innerHTML += `<div style=\"background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid ${item.rune.color}; display: flex; justify-content: space-between; align-items: center;\"><div style=\"flex: 1;\"><span style=\"font-size: 24px; margin-right: 8px;\">${item.rune.emoji}</span><span style=\"color: #fff; font-weight: bold;\">${item.rune.name}</span></div><div style=\"color: #aaa; font-size: 11px; margin-right: 12px;\">${item.rune.effect}</div><div style=\"color: #ffd700; font-weight: bold;\">×${item.count}</div></div>`;
+      });
+    }
+  }
+}
+
+// ================= 게임 로직 =================
+let gameState = { gold: 500, gem: 0, life: 20, wave: 0, totalWaves: 0, waveActive: false, enemiesToSpawn: [], spawnTimer: 0, speed: 1, selectedHero: null, selectedTower: null, towers: [], enemies: [], projectiles: [], effects: [], pathPoints: [], running: false, shakeTimer: 0, mode: 'normal' };
+let canvas, ctx, mouseX = 0, mouseY = 0;
+function setupCanvas() { canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d'); canvas.addEventListener('click', onCanvasClick); canvas.addEventListener('mousemove', onCanvasMove); }
+
+function startChapter(idx) {
+  const c = CHAPTERS[idx]; if (!currentAccount.deck || currentAccount.deck.length === 0) { showToast('덱을 편성해주세요.'); return; } showScreen('screen-game'); if (!canvas) setupCanvas();
+  gameState.currentChapterIdx = idx; gameState.currentChapter = c; gameState.wave = 0; gameState.totalWaves = c.waves.length; gameState.life = 20; gameState.gold = 500 + c.stage*50; gameState.shakeTimer = 0; gameState.mode = 'normal';
+  resetGameVars(); gameState.pathPoints = PATHS[idx % PATHS.length];
+  initGameUI(); showToast(`${c.isBoss ? '결전' : '진격'} ${c.id} 시작!`);
+  gameState.running = true; lastTime = 0; requestAnimationFrame((ts) => { lastTime = ts; requestAnimationFrame(gameLoop); });
+}
+
+function startChallengeMode() {
+  if (!currentAccount.deck || currentAccount.deck.length === 0) { showToast('덱 편성필요'); return; } showScreen('screen-game'); if (!canvas) setupCanvas();
+  const chal = { id: 'CHALLENGE', stage: 99, sub: 99, isBoss: true, name: '김도현을 잡아라!', waves: [{ delay: 10, enemies: [{ type: 'challengeDohyeon', delay: 10, hpMult: 1 }] }], reward: { gold: 50000, gem: 5000, scrap: 500 } };
+  gameState.currentChapterIdx = 'challenge'; gameState.currentChapter = chal; gameState.wave = 0; gameState.totalWaves = 1; gameState.life = 1; gameState.gold = 999999; gameState.mode = 'challenge';
+  resetGameVars(); gameState.pathPoints = PATHS[0]; initGameUI(); showToast(`🔥 챌린지 모드 시작!`);
+  gameState.running = true; lastTime = 0; requestAnimationFrame((ts) => { lastTime = ts; requestAnimationFrame(gameLoop); });
+}
+
+function startEndlessMode() {
+  if (!currentAccount.deck || currentAccount.deck.length === 0) { showToast('덱 편성필요'); return; } showScreen('screen-game'); if (!canvas) setupCanvas();
+  const end = { id: 'ENDLESS', stage: 0, sub: 0, isBoss: false, name: '유물 던전 (무한)', waves: [], reward: { gold: 0, gem: 0, scrap: 0 } };
+  gameState.currentChapterIdx = 'endless'; gameState.currentChapter = end; gameState.wave = 0; gameState.totalWaves = '∞'; gameState.life = 20; gameState.gold = 1000; gameState.mode = 'endless';
+  resetGameVars(); gameState.pathPoints = PATHS[1]; initGameUI(); showToast(`🏺 끝없는 유물 던전 진입`);
+  gameState.running = true; lastTime = 0; requestAnimationFrame((ts) => { lastTime = ts; requestAnimationFrame(gameLoop); });
+}
+
+function resetGameVars() { gameState.towers = []; gameState.enemies = []; gameState.projectiles = []; gameState.effects = []; gameState.waveActive = false; gameState.enemiesToSpawn = []; gameState.selectedHero = null; gameState.selectedTower = null; gameState.speed = currentAccount.settings.defaultSpeed || 1; }
+function initGameUI() { document.querySelectorAll('.speed-btn').forEach(b => b.classList.toggle('active', b.textContent === 'x' + gameState.speed)); document.getElementById('startWaveBtn').textContent = '▶ 웨이브 시작'; document.getElementById('startWaveBtn').disabled = false; document.getElementById('tower-menu').classList.remove('active'); document.getElementById('resultScreen').classList.remove('active'); updateGameHUD(); renderUnitRoster(); renderSkillButtons(); }
+
+function returnToMenu() { if (gameState.running && gameState.waveActive && gameState.mode !== 'endless') { if (!confirm('포기하시겠습니까?')) return; } gameState.running = false; saveCurrentAccount(); enterMainMenu(); }
+function updateGameHUD() { document.getElementById('goldDisplay').textContent = Math.floor(gameState.gold); document.getElementById('gemDisplay').textContent = currentAccount.gem; document.getElementById('lifeDisplay').textContent = gameState.life; document.getElementById('waveDisplay').textContent = `Wave ${gameState.wave} / ${gameState.totalWaves}`; document.getElementById('chapterDisplay').textContent = gameState.currentChapter ? `CH ${gameState.currentChapter.id}` : 'CH -'; document.getElementById('placementLimit').textContent = `⚔ 영웅 배치 [ ${gameState.towers.filter(t => !t.isMinion).length} / 6 ]`; }
+
+function renderUnitRoster() {
+  const roster = document.getElementById('unitRoster'); roster.innerHTML = ''; const deck = currentAccount.deck || [];
+  deck.forEach(hId => { const h = HEROES[hId]; if(!h) return; const card = document.createElement('div'); card.className = 'unit-card' + (gameState.selectedHero===h.id?' selected':''); card.innerHTML = `<div class="unit-rarity rarity-${h.rarity}">${h.rarity}</div><div class="unit-portrait" style="border-color:${h.color}; background:radial-gradient(circle, ${h.color}44, transparent);">${h.emoji}</div><div class="unit-name">${h.name}</div><div class="unit-cost">⬢ ${h.cost}</div>`; card.onclick = () => selectHero(h.id); roster.appendChild(card); });
+}
+
+function renderSkillButtons() {
+  const sb = document.getElementById('skillButtons'); sb.innerHTML = ''; let any = false;
+  gameState.towers.forEach((t, idx) => { if(t.isMinion) return; const h = HEROES[t.heroId]; if (!h.skillDesc || h.skillTrigger === 999) return; any = true; const btn = document.createElement('div'); btn.className = 'btn'; btn.style.background = `linear-gradient(180deg, rgba(60,20,80,0.8), rgba(20,10,30,0.9))`; btn.style.border = `1px solid ${h.color}`; btn.style.fontSize = '12px'; btn.style.padding = '10px'; btn.style.boxShadow = `0 4px 10px ${h.color}33`; btn.style.cursor = 'default'; const progress = Math.floor((t.atkCount / h.skillTrigger) * 100); const desc = getSkillDesc(t); btn.innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="font-size:14px; font-weight:bold; color:${h.color};">${h.emoji} ${h.name} ${t.level>=3?'<span style="color:#ffd700">★진화</span>':''}</span><span style="color:#4fc3f7;">스택 ${t.atkCount}/${h.skillTrigger}</span></div><div style="background:rgba(0,0,0,0.5); height:4px; border-radius:2px; margin-bottom:6px;"><div style="background:#4fc3f7; height:100%; width:${progress}%; border-radius:2px; transition:width 0.2s;"></div></div><div style="color:${t.level>=3?'#ffd700':'#ccc'}; font-size:11px; font-weight:${t.level>=3?'bold':'normal'};">${desc}</div>`; sb.appendChild(btn); });
+  if (!any) sb.innerHTML = '<div style="font-size:12px; color:#888; text-align:center; padding:10px;">스킬을 가진 영웅이 없습니다</div>';
+}
+
+function selectHero(id) { if (gameState.selectedHero === id) gameState.selectedHero = null; else gameState.selectedHero = id; renderUnitRoster(); }
+function onCanvasMove(e) { const rect = canvas.getBoundingClientRect(); mouseX = (e.clientX - rect.left) * (canvas.width / rect.width); mouseY = (e.clientY - rect.top) * (canvas.height / rect.height); }
+function onCanvasClick(e) {
+  const rect = canvas.getBoundingClientRect(); const x = (e.clientX - rect.left) * (canvas.width / rect.width); const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+  for (let i = 0; i < gameState.towers.length; i++) { const t = gameState.towers[i]; if (Math.hypot(t.x-x, t.y-y) < 25) { showTowerMenu(i); return; } }
+  document.getElementById('tower-menu').classList.remove('active'); gameState.selectedTower = null;
+  if (gameState.selectedHero) {
+    const h = HEROES[gameState.selectedHero]; if (gameState.gold < h.cost) { showToast('골드가 부족합니다!'); return; } if (gameState.towers.filter(t => !t.isMinion).length >= 6) { showToast('최대 6명의 영웅만 배치할 수 있습니다!'); return; } if (isOnPath(x, y, 40)) { showToast('경로 위에는 배치할 수 없습니다!'); return; } for (const t of gameState.towers) { if (Math.hypot(t.x-x, t.y-y) < 50) { showToast('다른 유닛과 너무 가깝습니다!'); return; } }
+    gameState.gold -= h.cost;
+    
+    // 유물 버프 적용하여 스탯 설정
+    const ab = currentAccount.artifacts.atkBuff / 100; const hb = currentAccount.artifacts.hpBuff / 100; const asb = currentAccount.artifacts.asBuff / 100;
+    
+    gameState.towers.push({ x, y, heroId: h.id, level: 1, hp: h.hp * (1+hb), maxHp: h.maxHp * (1+hb), damage: h.damage * (1+ab), range: h.range, attackSpeed: h.attackSpeed * (1+asb), attackCooldown: 0, kills: 0, atkCount: 0, isMinion: false });
+    gameState.effects.push({type:'spawn_magic', x:x, y:y, color:h.color, life:40}); gameState.selectedHero = null; renderUnitRoster(); renderSkillButtons(); updateGameHUD();
+  }
+}
+function isOnPath(x, y, margin) { const pts = gameState.pathPoints; for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i+1]; if (pointToSegmentDistance(x, y, a.x, a.y, b.x, b.y) < margin) return true; } return false; }
+function pointToSegmentDistance(px, py, x1, y1, x2, y2) { const dx = x2 - x1, dy = y2 - y1; const len2 = dx*dx + dy*dy; if (len2 === 0) return Math.hypot(px-x1, py-y1); let t = ((px-x1)*dx + (py-y1)*dy) / len2; t = Math.max(0, Math.min(1, t)); return Math.hypot(px - (x1+t*dx), py - (y1+t*dy)); }
+
+function showTowerMenu(idx) {
+  gameState.selectedTower = idx; const t = gameState.towers[idx]; const h = HEROES[t.heroId]; const upgradeCost = Math.floor(h.cost * (0.8 + t.level * 0.6)); const sellPrice = Math.floor(h.cost * 0.7 + (t.level-1) * h.cost * 0.5); const desc = getSkillDesc(t);
+  document.getElementById('tower-menu').innerHTML = `<div class="tower-menu-title">${h.emoji} ${h.name} <span style="color:${h.color}; font-size:16px;">Lv.${t.level}</span></div><div class="tower-stat"><span>체력</span><span class="value" style="color:#ffb74d">${Math.floor(t.hp)} / ${Math.floor(t.maxHp)}</span></div><div class="tower-stat"><span>공격력</span><span class="value">${Math.floor(t.damage)}</span></div><div class="tower-stat"><span>사거리</span><span class="value">${Math.floor(t.range)}</span></div><div class="tower-stat"><span>스택</span><span class="value" style="color:#4fc3f7">${t.atkCount} / ${h.skillTrigger===999 ? '-' : h.skillTrigger}</span></div><div class="skill-info">✦ <b>오토 스킬</b><br/><span style="color:${t.level>=3?'#ffd700':'inherit'}">${desc}</span></div>${!t.isMinion ? `<button class="btn" onclick="upgradeTower()" ${gameState.gold < upgradeCost || t.level >= 5 ? 'disabled' : ''}>${t.level >= 5 ? 'MAX LEVEL' : `⚡ 업그레이드 (⬢${upgradeCost})`}</button><button class="btn btn-primary" onclick="sellTower()">💰 철거 (⬢${sellPrice})</button>` : ''}`;
+  document.getElementById('tower-menu').classList.add('active');
+}
+function upgradeTower() {
+  const idx = gameState.selectedTower; if (idx === null) return; const t = gameState.towers[idx]; if (t.level >= 5 || t.isMinion) return; const h = HEROES[t.heroId]; const cost = Math.floor(h.cost * (0.8 + t.level * 0.6)); if (gameState.gold < cost) return;
+  gameState.gold -= cost; t.level++; t.maxHp *= 1.3; t.hp = t.maxHp; t.damage *= 1.5; t.range *= 1.1; t.attackSpeed *= 0.9;
+  gameState.effects.push({type:'upgrade_circle', x:t.x, y:t.y, color:h.color, life:40}); showTowerMenu(idx); updateGameHUD(); renderSkillButtons();
+}
+function sellTower() { const idx = gameState.selectedTower; if (idx === null) return; const t = gameState.towers[idx]; const h = HEROES[t.heroId]; const sellPrice = Math.floor(h.cost * 0.7 + (t.level-1) * h.cost * 0.5); gameState.gold += sellPrice; gameState.effects.push({type:'sell', x:t.x, y:t.y, color:'#ffd700', life:20}); gameState.towers.splice(idx, 1); gameState.selectedTower = null; document.getElementById('tower-menu').classList.remove('active'); renderSkillButtons(); updateGameHUD(); }
+
+function startWave() {
+  if (gameState.waveActive) return; 
+  if (gameState.mode !== 'endless' && gameState.wave >= gameState.totalWaves) return;
+  gameState.wave++; gameState.waveActive = true; 
+  if (gameState.mode === 'endless') {
+    // 무한 웨이브 생성
+    const wave = { delay: 40, enemies: [] };
+    const count = 10 + gameState.wave * 2;
+    const hpMult = Math.pow(1.2, gameState.wave);
+    for(let i=0; i<count; i++) {
+       let type = 'dohyeonling'; const r = Math.random();
+       if(r < 0.2) type = 'dohyeonRunner'; else if(r<0.4) type = 'dohyeonBrute'; else if(r<0.6) type = 'dohyeonKnight'; else if(r<0.8) type = 'dohyeonReaper';
+       wave.enemies.push({type, delay: 20+Math.random()*20, hpMult});
+    }
+    if (gameState.wave % 5 === 0) wave.enemies.push({type:'boss1', delay:50, hpMult});
+    gameState.enemiesToSpawn = wave.enemies;
+  } else {
+    gameState.enemiesToSpawn = gameState.currentChapter.waves[gameState.wave - 1].enemies.map(e => ({...e})); 
+  }
+  gameState.spawnTimer = 0; document.getElementById('startWaveBtn').disabled = true; showToast(`⚔️ Wave ${gameState.wave} 시작!`); updateGameHUD();
+}
+function setSpeed(s) { gameState.speed = s; document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('.speed-btn').forEach(b => { if (b.textContent === 'x'+s) b.classList.add('active'); }); }
+
+let lastTime = 0;
+function gameLoop(timestamp) { if (!gameState.running) return; if (lastTime === 0) lastTime = timestamp; const dt = Math.min(50, timestamp - lastTime) / 16.66; lastTime = timestamp; try { for (let s = 0; s < gameState.speed; s++) update(dt); render(); } catch(e) { console.error(e); } if (gameState.running) requestAnimationFrame(gameLoop); }
+
+function findTarget(t) { let furthest = null, furthestProgress = -Infinity; for (const e of gameState.enemies) { if (e.dead) continue; const d = Math.hypot(e.x-t.x, e.y-t.y); if (d <= t.range) { const next = gameState.pathPoints[e.pathIdx+1]; const progress = e.pathIdx * 10000 + (next ? -Math.hypot(next.x-e.x, next.y-e.y) : 0); if (progress > furthestProgress) { furthestProgress = progress; furthest = e; } } } return furthest; }
+
+function executeAutoSkill(t, h, target) {
+  const isUp = t.level >= 3;
+  
+  if (h.id === 'coderWooseok') {
+    gameState.effects.push({ type:'kanji_magic', x:target.x, y:target.y, text:'DEL', color:'#4caf50', life:20 });
+  } else {
+    gameState.effects.push({ type:'splash_magic', x:target.x, y:target.y, radius:80, color:h.color, life:20 });
+  }
+  
+  if(h.id === 'zombieNi') { t.hp = t.maxHp; if(isUp){ gameState.enemies.forEach(e=>{e.hp-=2000;}); gameState.effects.push({type:'toxic_splash',x:t.x,y:t.y,radius:999,color:'#8bc34a',life:40}); gameState.shakeTimer=15; } else { gameState.enemies.forEach(e=>{ if(Math.hypot(e.x-t.x,e.y-t.y)<=150) e.hp-=200;}); gameState.effects.push({type:'toxic_splash',x:t.x,y:t.y,radius:150,color:'#8bc34a',life:40}); } }
+  else if(h.id === 'abyssHyeonBin') { const angle = Math.atan2(target.y-t.y, target.x-t.x); const width = isUp ? 150 : 40; const dmg = isUp ? 8000 : 2500; gameState.enemies.forEach(e => { const dist = Math.abs(Math.cos(angle)*(t.y-e.y) - Math.sin(angle)*(t.x-e.x)); if(dist < width) e.hp -= dmg; }); gameState.effects.push({ type:'beam_blast', x:t.x, y:t.y, angle:angle, color:'#1a237e', life:30 }); if(isUp) gameState.shakeTimer=20; }
+  else if(h.id === 'awakenSiHoon2') { const ratio = isUp ? 1.0 : 0.3; gameState.enemies.forEach(e => { e.hp -= isUp ? 99999 : e.hp * ratio; }); gameState.effects.push({ type:'void_collapse', x:canvas.width/2, y:canvas.height/2, life:50 }); gameState.shakeTimer = isUp ? 40 : 15; }
+  else if(h.id === 'ahnJiMin') { if(isUp) { gameState.towers.forEach(ot=>{ot.hp=ot.maxHp; ot.shield=180;}); gameState.effects.push({type:'holy_heal',x:t.x,y:t.y,radius:999,life:40}); } else { let lowest=t; gameState.towers.forEach(ot=>{if(ot.hp/ot.maxHp < lowest.hp/lowest.maxHp) lowest=ot;}); lowest.hp=Math.min(lowest.maxHp, lowest.hp + 500); gameState.effects.push({type:'holy_heal',x:lowest.x,y:lowest.y,radius:80,life:30}); } }
+  else if(h.id === 'kindredAwaken') { gameState.enemies.forEach(e=>{e.hp-=5000;}); gameState.towers.forEach(ot=>{ot.hp=ot.maxHp;}); gameState.effects.push({type:'holy_heal',x:t.x,y:t.y,radius:999,life:40}); gameState.shakeTimer=15; }
+  else if(h.id === 'yuumiAwaken') { gameState.towers.forEach(ot=>{ot.shield=300;}); if(isUp){ for(let i=0;i<3;i++) gameState.towers.push({ x:t.x+(Math.random()-0.5)*100, y:t.y+(Math.random()-0.5)*100, heroId:'yuumi', hp:800, maxHp:800, damage:50, range:150, attackSpeed:1.5, attackCooldown:0, atkCount:0, level:5, isMinion:true }); } gameState.effects.push({type:'holy_heal',x:t.x,y:t.y,radius:999,life:30}); }
+  else if(h.id === 'ezrealAwaken') { const dmg = isUp ? 5000 : 1500; gameState.enemies.forEach(e => { if(Math.hypot(e.x-target.x, e.y-target.y) <= 200) e.hp -= dmg; }); gameState.effects.push({type:'beam_blast', x:t.x, y:t.y, angle:Math.atan2(target.y-t.y, target.x-t.x), color:'#ffee58', life:20}); if(isUp) gameState.shakeTimer=15; }
+  else if(h.id === 'aatrox') { const dmg = isUp?1500:500; gameState.enemies.forEach(e=>{if(Math.hypot(e.x-t.x,e.y-t.y)<=150){e.hp-=dmg; t.hp=Math.min(t.maxHp,t.hp+dmg*0.5);}}); gameState.effects.push({type:'blood_splash',x:t.x,y:t.y,radius:150,life:30}); }
+  else if(h.id === 'joru') { t.hp-=100; if(isUp){ gameState.enemies.forEach(e=>{if(Math.hypot(e.x-t.x,e.y-t.y)<=120)e.hp-=3000;}); t.hp=0; gameState.effects.push({type:'bomb',x:t.x,y:t.y,life:30}); } }
+  else if(h.id === 'abiwena') { gameState.enemies.forEach(e=>{if(Math.hypot(e.x-t.x,e.y-t.y)<=180) e.hp-=isUp?1500:500;}); gameState.effects.push({type:'dimensional_slash',x:t.x,y:t.y,radius:180,life:20}); }
+  else if(h.id === 'coderWooseok') { if(isUp) target.hp=0; else target.hp*=0.5; }
+  else if(h.id === 'flipbook8x8') { gameState.enemies.forEach(e=>{if(Math.hypot(e.x-t.x,e.y-t.y)<=120){e.slowTimer=60;e.slowFactor=0;}}); if(isUp) t.attackSpeed*=3; setTimeout(()=>t.attackSpeed=h.attackSpeed,3000); gameState.effects.push({type:'pixel_burst',x:t.x,y:t.y,life:30}); }
+  else if(h.id === 'sacredDice') { const dmg = isUp?3000:Math.random()*1000; gameState.enemies.forEach(e=>{if(Math.hypot(e.x-target.x,e.y-target.y)<=150)e.hp-=dmg;}); gameState.effects.push({type:'dice_roll',x:target.x,y:target.y,life:30}); }
+  else if(h.id === 'untactHorror') { gameState.enemies.forEach(e=>{e.slowTimer=120;e.slowFactor=0; if(isUp)e.hp-=5000;}); gameState.effects.push({type:'glitch',x:canvas.width/2,y:canvas.height/2,life:30}); gameState.shakeTimer=20; }
+  else if(h.id === 'lionPaladin') { gameState.enemies.forEach(e=>{e.slowTimer=60;e.slowFactor=0;}); if(isUp){ gameState.towers.forEach(ot=>{ot.shield=180; ot.damage*=1.2;}); } gameState.effects.push({type:'lion_roar',x:t.x,y:t.y,life:30}); }
+  else if(h.id === 'dimBreaker') { gameState.enemies.forEach(e=>{e.hp-=isUp?5000:1000;}); gameState.effects.push({type:'void_collapse',x:canvas.width/2,y:canvas.height/2,life:40}); gameState.shakeTimer=30; }
+  else { 
+    gameState.enemies.forEach(e => { if(Math.hypot(e.x-target.x, e.y-target.y) <= 100) e.hp -= t.damage*3; });
+  }
+  renderSkillButtons();
+}
+
+function update(dt) {
+  if (gameState.shakeTimer > 0) gameState.shakeTimer -= dt;
+  if (gameState.waveActive && gameState.enemiesToSpawn.length > 0) { gameState.spawnTimer -= dt; if (gameState.spawnTimer <= 0) { const next = gameState.enemiesToSpawn.shift(); spawnEnemy(next); gameState.spawnTimer = next.delay * 0.5; } }
+  
+  for (let i = gameState.enemies.length - 1; i >= 0; i--) {
+    const e = gameState.enemies[i]; e.curAtkCd -= dt;
+    if(e.curAtkCd <= 0 && gameState.towers.length > 0) {
+      let targetT = null; let minDist = e.atkRange; for(const t of gameState.towers) { const dist = Math.hypot(t.x-e.x, t.y-e.y); if(dist < minDist) { minDist = dist; targetT = t; } }
+      if(targetT || e.atkType === 'full') { e.curAtkCd = e.atkCd; if(e.atkType === 'single' && targetT) { if(!targetT.shield) targetT.hp -= e.dmg; } else if(e.atkType === 'full') { gameState.towers.forEach(t => {if(!t.shield) t.hp -= e.dmg;}); } else if(e.atkType === 'circle' && targetT) { gameState.towers.forEach(t => { if(Math.hypot(t.x-targetT.x, t.y-targetT.y) <= 80 && !t.shield) t.hp -= e.dmg; }); } }
+    }
+    updateEnemy(e, dt);
+    if (e.dead) {
+      if (e.reachedEnd) { gameState.life -= (e.boss ? 5 : 1); gameState.effects.push({type:'damage_base', x:gameState.pathPoints[gameState.pathPoints.length-1].x, y:gameState.pathPoints[gameState.pathPoints.length-1].y, life:20}); if (gameState.life <= 0) { gameOver(false); return; } } 
+      else { gameState.gold += e.gold; if(e.boss && e.drop) { currentAccount.bossItems[e.drop] = (currentAccount.bossItems[e.drop] || 0) + 1; showToast(`🎁 보스 전리품 획득!`); } gameState.effects.push({type:'death', x:e.x, y:e.y, color:e.color, life:25}); }
+      gameState.enemies.splice(i, 1); updateGameHUD(); renderSkillButtons();
+    }
+  }
+  
+  for (let i = gameState.towers.length - 1; i >= 0; i--) {
+    const t = gameState.towers[i]; if(t.shield > 0) t.shield -= dt;
+    if(t.hp <= 0) { gameState.effects.push({type:'sell', x:t.x, y:t.y, color:'#ff0000', life:30}); gameState.towers.splice(i, 1); if(gameState.selectedTower === i) { gameState.selectedTower = null; document.getElementById('tower-menu').classList.remove('active'); } updateGameHUD(); renderSkillButtons(); continue; }
+    if(t.isMinion) t.hp -= dt * 0.5;
+    t.attackCooldown -= dt;
+    if (t.attackCooldown <= 0) { const target = findTarget(t); if (target) { const h = HEROES[t.heroId]; t.atkCount++; if (t.atkCount >= h.skillTrigger) { executeAutoSkill(t, h, target); t.atkCount = 0; } else { attack(t, target); } t.attackCooldown = 60 / t.attackSpeed; renderSkillButtons(); } }
+  }
+  
+  for (let i = gameState.projectiles.length - 1; i >= 0; i--) { const p = gameState.projectiles[i]; updateProjectile(p, dt); if (p.dead) gameState.projectiles.splice(i, 1); }
+  for (let i = gameState.effects.length - 1; i >= 0; i--) { gameState.effects[i].life -= dt; if (gameState.effects[i].life <= 0) gameState.effects.splice(i, 1); }
+  
+  if (gameState.waveActive && gameState.enemiesToSpawn.length === 0 && gameState.enemies.length === 0) {
+    gameState.waveActive = false;
+    if (gameState.mode === 'endless') {
+      const fragDrop = Math.floor(gameState.wave / 2) + 1;
+      currentAccount.artifacts.fragments += fragDrop;
+      showToast(`✨ Wave ${gameState.wave} 클리어! <span style="color:#4db6ac">유물 조각 +${fragDrop}</span>`);
+      if(currentAccount.settings.autoWave) setTimeout(() => startWave(), 1000);
+      document.getElementById('startWaveBtn').disabled = false;
+      return;
+    }
+    if (gameState.wave >= gameState.totalWaves) { gameOver(true); return; }
+    document.getElementById('startWaveBtn').disabled = false; gameState.gold += 50 + gameState.wave * 10; showToast(`✨ Wave ${gameState.wave} 클리어! +${50 + gameState.wave * 10} ⬢`); updateGameHUD(); if (currentAccount.settings.autoWave) setTimeout(() => startWave(), 1500);
+  }
+}
+
+function spawnEnemy(data) { const def = ENEMIES[data.type]; const start = gameState.pathPoints[0]; gameState.enemies.push({ type: data.type, name: def.name, emoji: def.emoji, color: def.color, x: start.x, y: start.y, hp: def.hp * data.hpMult, maxHp: def.hp * data.hpMult, speed: def.speed, gold: def.gold, armor: def.armor || 0, boss: def.boss || false, drop: def.drop, pathIdx: 0, atkType: def.atkType || 'single', atkRange: def.atkRange || 50, atkCd: def.atkCd || 120, curAtkCd: def.atkCd || 120, dmg: def.dmg || 10, slowTimer: 0, slowFactor: 1, dead: false, reachedEnd: false, }); }
+function updateEnemy(e, dt) { const target = gameState.pathPoints[e.pathIdx + 1]; if (!target) { e.dead = true; e.reachedEnd = true; return; } const dx = target.x - e.x, dy = target.y - e.y; const dist = Math.hypot(dx, dy); let speed = e.speed; if (e.slowTimer > 0) { speed *= (e.slowFactor || 0.5); e.slowTimer -= dt; } if (dist < speed * dt) { e.x = target.x; e.y = target.y; e.pathIdx++; } else { e.x += (dx/dist) * speed * dt; e.y += (dy/dist) * speed * dt; } if (e.hp <= 0) { e.dead = true; return; } }
+function attack(t, target) { const h = HEROES[t.heroId]; gameState.projectiles.push({ x: t.x, y: t.y, target, targetX: target.x, targetY: target.y, speed: 15, damage: t.damage, color: h.color, type: h.projectileType, splashRadius: h.splashRadius || 0, heroId: h.id, towerRef: t, life: 60, dead: false, }); }
+function updateProjectile(p, dt) { p.life -= dt; if (p.life <= 0) { p.dead = true; return; } if (p.target && !p.target.dead) { p.targetX = p.target.x; p.targetY = p.target.y; } const dx = p.targetX - p.x, dy = p.targetY - p.y; const dist = Math.hypot(dx, dy); if (dist < p.speed * dt) { hitTarget(p); p.dead = true; } else { p.x += (dx/dist) * p.speed * dt; p.y += (dy/dist) * p.speed * dt; } }
+function hitTarget(p) { if (p.splashRadius > 0) { gameState.enemies.forEach(e => { const d = Math.hypot(e.x-p.targetX, e.y-p.targetY); if (d <= p.splashRadius) { e.hp -= Math.max(1, p.damage - (e.armor||0)); } }); gameState.effects.push({type:'splash_magic', x:p.targetX, y:p.targetY, radius:p.splashRadius, color:p.color, life:20}); } else { if (p.target && !p.target.dead) { p.target.hp -= Math.max(1, p.damage - (p.target.armor||0)); } gameState.effects.push({type:'hit_spark', x:p.targetX, y:p.targetY, color:p.color, life:10}); } }
+
+// === 렌더링 시스템 ===
+function render() {
+  ctx.save(); ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (gameState.shakeTimer > 0) { const mag = Math.min(10, gameState.shakeTimer); ctx.translate(Math.random()*mag*2 - mag, Math.random()*mag*2 - mag); }
+  drawMap(); drawPath();
+  if (gameState.selectedHero) { const h = HEROES[gameState.selectedHero]; ctx.save(); const canPlace = !isOnPath(mouseX, mouseY, 40); ctx.globalAlpha = 0.2; ctx.fillStyle = canPlace ? h.color : '#f44'; ctx.beginPath(); ctx.arc(mouseX, mouseY, h.range, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha = 0.6; ctx.strokeStyle = canPlace ? h.color : '#f44'; ctx.lineWidth = 2; ctx.stroke(); ctx.globalAlpha = canPlace ? 0.9 : 0.4; ctx.font = '40px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(h.emoji, mouseX, mouseY); ctx.restore(); }
+  if (gameState.selectedTower !== null && gameState.towers[gameState.selectedTower]) { const t = gameState.towers[gameState.selectedTower]; ctx.save(); ctx.globalAlpha = 0.15; ctx.fillStyle = HEROES[t.heroId].color; ctx.beginPath(); ctx.arc(t.x, t.y, t.range, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = HEROES[t.heroId].color; ctx.globalAlpha = 0.8; ctx.lineWidth = 2; ctx.setLineDash([10, 10]); ctx.stroke(); ctx.restore(); }
+  gameState.towers.forEach(t => drawTower(t)); gameState.enemies.forEach(e => drawEnemy(e)); gameState.projectiles.forEach(p => drawProjectile(p)); gameState.effects.forEach(e => drawEffect(e));
+  ctx.restore();
+}
+
+function drawMap() { ctx.save(); ctx.strokeStyle = 'rgba(212,175,55,0.05)'; ctx.lineWidth = 1; for (let x = 0; x < canvas.width; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); } for (let y = 0; y < canvas.height; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); } const g = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 100, canvas.width/2, canvas.height/2, canvas.width/1.2); g.addColorStop(0, 'rgba(40,20,60,0)'); g.addColorStop(1, 'rgba(0,0,0,0.7)'); ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.restore(); }
+function drawPath() { const pts = gameState.pathPoints; if (pts.length < 2) return; ctx.save(); ctx.strokeStyle = 'rgba(20,10,30,0.8)'; ctx.lineWidth = 54; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y); ctx.stroke(); ctx.strokeStyle = '#4a2818'; ctx.lineWidth = 46; ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y); ctx.stroke(); ctx.strokeStyle = 'rgba(212,175,55,0.2)'; ctx.lineWidth = 2; ctx.setLineDash([10, 15]); ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); for(let i=1; i<pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#c62828'; ctx.beginPath(); ctx.arc(pts[0].x, pts[0].y, 28, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = '#fff'; ctx.font = 'bold 20px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🌀', pts[0].x, pts[0].y); const end = pts[pts.length-1]; ctx.fillStyle = '#1b5e20'; ctx.beginPath(); ctx.arc(end.x, end.y, 28, 0, Math.PI*2); ctx.fill(); ctx.fillText('🏰', end.x, end.y); ctx.restore(); }
+function drawTower(t) { const h = HEROES[t.heroId]; ctx.save(); ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.beginPath(); ctx.ellipse(t.x, t.y+15, 25, 10, 0, 0, Math.PI*2); ctx.fill(); const g = ctx.createRadialGradient(t.x, t.y, 5, t.x, t.y, 35); g.addColorStop(0, h.color + '66'); g.addColorStop(1, h.color + '00'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(t.x, t.y, 35, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = h.color; ctx.strokeStyle = t.shield > 0 ? '#4fc3f7' : '#fff'; ctx.lineWidth = t.shield > 0 ? 5 : 3; ctx.beginPath(); ctx.arc(t.x, t.y, 20, 0, Math.PI*2); ctx.fill(); ctx.stroke(); ctx.font = '26px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(h.emoji, t.x, t.y); if (!t.isMinion && t.level > 1) { ctx.fillStyle = t.level>=3?'#ff6b6b':'#ffd700'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('★'.repeat(t.level-1), t.x, t.y - 30); } ctx.fillStyle = '#000'; ctx.fillRect(t.x-15, t.y+22, 30, 5); ctx.fillStyle = '#4caf50'; ctx.fillRect(t.x-15, t.y+22, 30 * (Math.max(0, t.hp)/t.maxHp), 5); ctx.restore(); }
+function drawEnemy(e) { ctx.save(); ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.beginPath(); ctx.ellipse(e.x, e.y+15, e.boss ? 20 : 12, 6, 0, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = e.color; ctx.beginPath(); ctx.arc(e.x, e.y, e.boss ? 24 : 16, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = e.boss ? '#ffb74d' : '#000'; ctx.lineWidth = 2; ctx.stroke(); ctx.font = e.boss ? '32px sans-serif' : '22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(e.emoji, e.x, e.y); if (e.slowTimer > 0) { ctx.strokeStyle = '#4fc3f7'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(e.x, e.y, e.boss ? 28 : 20, 0, Math.PI*2); ctx.stroke(); } const w = e.boss ? 48 : 30; const ratio = e.hp / e.maxHp; ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(e.x-w/2-1, e.y-(e.boss?38:26)-1, w+2, 6); ctx.fillStyle = ratio > 0.5 ? '#4caf50' : ratio > 0.25 ? '#ffb74d' : '#f44336'; ctx.fillRect(e.x-w/2, e.y-(e.boss?38:26), w*ratio, 4); if (e.boss) { ctx.fillStyle = '#ffd700'; ctx.font = '900 14px Noto Serif KR'; ctx.strokeStyle = '#000'; ctx.lineWidth = 4; ctx.strokeText(e.name, e.x, e.y - 48); ctx.fillText(e.name, e.x, e.y - 48); } ctx.restore(); }
+function drawProjectile(p) { ctx.save(); const angle = Math.atan2(p.targetY-p.y, p.targetX-p.x); ctx.translate(p.x, p.y); ctx.rotate(angle); if (p.type === 'sword') { ctx.fillStyle=p.color; ctx.shadowBlur=10; ctx.fillRect(-10, -3, 20, 6); } else if (p.type === 'arrow') { ctx.strokeStyle=p.color; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(-8,0); ctx.lineTo(8,0); ctx.moveTo(8,0); ctx.lineTo(3,-4); ctx.moveTo(8,0); ctx.lineTo(3,4); ctx.stroke(); } else { ctx.fillStyle='#fff'; ctx.shadowColor=p.color; ctx.shadowBlur=15; ctx.beginPath(); ctx.arc(0,0,6,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=0.5; ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(0,0,10,0,Math.PI*2); ctx.fill(); } ctx.restore(); }
+
+function drawEffect(e) {
+  ctx.save();
+  const ratio = e.life / 40; 
+  
+  if (e.type === 'kanji_magic') { 
+    ctx.globalAlpha = Math.min(1, ratio * 2); ctx.translate(e.x, e.y); ctx.scale(2-ratio, 2-ratio); ctx.fillStyle = e.color; ctx.font = '900 40px Noto Serif KR'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = e.color; ctx.shadowBlur = 20; ctx.fillText(e.text, 0, 0); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.strokeText(e.text, 0, 0); 
+  }
+  else if (e.type === 'spawn_magic' || e.type === 'upgrade_circle') { 
+    ctx.globalAlpha = ratio; ctx.translate(e.x, e.y); ctx.rotate(ratio * Math.PI * 2); ctx.strokeStyle = e.color; ctx.lineWidth = 4; ctx.setLineDash([10, 15]); ctx.beginPath(); ctx.arc(0, 0, 40 + (1-ratio)*20, 0, Math.PI*2); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 0, 20 + (1-ratio)*40, 0, Math.PI*2); ctx.stroke(); 
+  }
+  else if (e.type === 'splash_magic') { 
+    ctx.globalAlpha = ratio; const grad=ctx.createRadialGradient(e.x,e.y,0,e.x,e.y,e.radius); grad.addColorStop(0,e.color+'aa'); grad.addColorStop(1,e.color+'00'); ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(e.x,e.y,e.radius*(1.5-ratio*0.5),0,Math.PI*2); ctx.fill(); ctx.strokeStyle=e.color; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(e.x, e.y, e.radius*(1.5-ratio*0.5), 0, Math.PI*2); ctx.stroke(); 
+  }
+  else if (e.type === 'void_collapse') {
+    ctx.globalAlpha = ratio; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(e.x, e.y, 999 * (1-ratio), 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = '#7e57c2'; ctx.lineWidth = 10; ctx.stroke();
+  }
+  else if (e.type === 'beam_blast') {
+    ctx.globalAlpha = ratio; ctx.translate(e.x, e.y); ctx.rotate(e.angle); ctx.fillStyle = e.color; ctx.shadowColor = e.color; ctx.shadowBlur = 30; ctx.fillRect(0, -30, 2000, 60); ctx.fillStyle = '#fff'; ctx.fillRect(0, -10, 2000, 20);
+  }
+  else if (e.type === 'pixel_burst') {
+    ctx.globalAlpha = ratio; ctx.fillStyle = '#26c6da'; for(let i=0; i<10; i++) { ctx.fillRect(e.x + (Math.random()-0.5)*100, e.y + (Math.random()-0.5)*100, 8, 8); }
+  }
+  else if (e.type === 'blood_splash') {
+    ctx.globalAlpha = ratio; ctx.fillStyle = '#d32f2f'; ctx.beginPath(); ctx.arc(e.x, e.y, e.radius*(1.5-ratio), 0, Math.PI*2); ctx.fill();
+  }
+  else { 
+    if (e.type === 'death') { ctx.globalAlpha=e.life/25; ctx.fillStyle=e.color; ctx.beginPath(); ctx.arc(e.x,e.y,(25-e.life)*2,0,Math.PI*2); ctx.fill(); }
+    else if (e.type === 'hit_spark') { ctx.globalAlpha=e.life/10; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(e.x,e.y,(10-e.life)*1.5,0,Math.PI*2); ctx.fill(); }
+    else if (e.type === 'damage_base') { ctx.fillStyle='rgba(255,0,0,'+((e.life/20)*0.5)+')'; ctx.fillRect(0,0,canvas.width,canvas.height); }
+  }
+  ctx.restore();
+}
+
+function gameOver(victory) {
+  gameState.running = false; const screen = document.getElementById('resultScreen'); const title = document.getElementById('resultTitle'); const reward = document.getElementById('resultReward');
+  if (victory) {
+    title.textContent = 'VICTORY'; title.className = 'result-title victory'; const r = gameState.currentChapter.reward; 
+    let firstClearGems = 0; let firstClearGold = 0; let firstClearScrap = 0;
+    
+    if (!currentAccount.clearedChapters.includes(gameState.currentChapter.id) && gameState.mode !== 'endless') { 
+      currentAccount.clearedChapters.push(gameState.currentChapter.id); 
+      currentAccount.totalClears++; 
+      
+      if (gameState.currentChapter.id === 'CHALLENGE') {
+        firstClearGold = 100000;
+        firstClearGems = 10000;
+        firstClearScrap = 1000;
+      } else {
+        firstClearGems = 100; 
+      }
+    }
+
+    if (gameState.currentChapter.id === 'CHALLENGE' && currentAccount.clearedChapters.includes('CHALLENGE') && firstClearGold === 0) {
+      currentAccount.gold += 0;
+      reward.innerHTML = `<div style="font-size:24px; margin-bottom:15px;">✦ ${gameState.currentChapter.name} 클리어! ✦</div><div style="color:#aaa; background:rgba(0,0,0,0.5); padding:8px 20px; border-radius:8px; margin:5px;">이미 클리어한 챌린지는 보상이 없습니다.</div>`;
+    } else {
+      currentAccount.gold += (r.gold + firstClearGold); currentAccount.gem += (r.gem + firstClearGems); currentAccount.scrap += (r.scrap + firstClearScrap); 
+      reward.innerHTML = `<div style="font-size:24px; margin-bottom:15px;">✦ ${gameState.currentChapter.name} 클리어! ✦</div><div style="color:#ffd700; background:rgba(0,0,0,0.5); padding:8px 20px; border-radius:8px; margin:5px;">⬢ +${r.gold + firstClearGold} 골드</div><div style="color:#e1bee7; background:rgba(0,0,0,0.5); padding:8px 20px; border-radius:8px; margin:5px;">◆ +${r.gem + firstClearGems} 잼 ${firstClearGems>0? '<span style="color:#ffb74d;font-weight:900;">(최초클리어 보너스!)</span>':''}</div><div style="color:#81c784; background:rgba(0,0,0,0.5); padding:8px 20px; border-radius:8px; margin:5px;">⚙ +${r.scrap + firstClearScrap} 파편</div>${gameState.currentChapter.isBoss ? '<div style="color:#ffb74d; margin-top:10px; font-size:14px;">보스를 처치했습니다! 크래프팅에서 재료를 확인하세요!</div>' : ''}`;
+    }
+    saveCurrentAccount(); 
+  } else { 
+    if(gameState.mode === 'endless') {
+      title.textContent = 'EXPEDITION OVER'; title.className = 'result-title victory';
+      reward.innerHTML = `<div style="font-size:24px; margin-bottom:15px;">🏺 유물 던전 탐험 종료</div><div style="color:#4db6ac; background:rgba(0,0,0,0.5); padding:8px 20px; border-radius:8px; margin:5px;">${gameState.wave} 웨이브 도달</div>`;
+    } else {
+      title.textContent = 'DEFEAT'; title.className = 'result-title defeat'; reward.innerHTML = `<span style="color:#aaa; font-style:italic;">마왕의 군세에 패배했다...<br>전열을 가다듬고 다시 도전하라!</span>`; 
+    }
+  } 
+  screen.classList.add('active');
+}
+function afterResult() { document.getElementById('resultScreen').classList.remove('active'); enterMainMenu(); }
+</script>
+</body>
+</html>
